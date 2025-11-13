@@ -3,19 +3,56 @@
   "version": "1.0.0",
   "description": "Template for the WebSocket remote control task",
   "main": "index.js",
-  "type": "module",
   "scripts": {
-    "start": "node ./index.js",
-    "start:dev": "nodemon ./index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start:http": "nodemon --watch src --ext ts --exec ts-node src/http-server/index.ts",
+    "start:ws": "nodemon --watch src --ext ts --exec ts-node src/game-server/ws-server/ws-server.ts",
+    "build": "tsc",
+    "test": "jest",
+    "coverage": "jest --coverage",
+    "prepare": "husky",
+    "format": "npx prettier . --check --ignore-unknown",
+    "format:fix": "npx prettier . --write --list-different --ignore-unknown",
+    "lint": "eslint ./src",
+    "lint:fix": "npm run lint --fix"
   },
   "author": "",
   "keywords": [],
   "license": "ISC",
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
   "devDependencies": {
-    "nodemon": "^2.0.16"
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.39.1",
+    "@tsconfig/recommended": "^1.0.11",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.0",
+    "@types/supertest": "^6.0.3",
+    "@types/ws": "^8.18.1",
+    "@typescript-eslint/eslint-plugin": "^8.46.3",
+    "@typescript-eslint/parser": "^8.46.3",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "globals": "^16.5.0",
+    "husky": "^9.1.7",
+    "jest": "^30.2.0",
+    "lint-staged": "^16.2.6",
+    "nodemon": "^3.1.10",
+    "prettier": "^3.6.2",
+    "supertest": "^7.1.4",
+    "ts-jest": "^29.4.5",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.3"
   },
   "dependencies": {
+    "dotenv": "^17.2.3",
     "ws": "^8.8.0"
   }
 }

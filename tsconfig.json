@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "baseUrl": "src",
+    "outDir": "dist",
+    "rootDir": "src",
+    "target": "ES2020",
+    "module": "commonjs",
+    "lib": ["ESNext"],
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "noUncheckedIndexedAccess": true,
+    "forceConsistentCasingInFileNames": true,
+    "removeComments": true,
+    "sourceMap": true,
+    "skipLibCheck": true,
+    "strictPropertyInitialization": false,
+    "allowJs": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+    "isolatedModules": true,
+    "moduleDetection": "force"
+  },
+  "include": ["src"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "eslint.config.mjs",
+    "jest.config.mjs",
+    "lint-staged.config.mjs",
+    "prettier.config.mjs",
+    "*.bak"
+  ]
+}
