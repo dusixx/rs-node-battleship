@@ -4,6 +4,7 @@ import type { WithOptional } from '../../../global';
 import type {
   CommandResponse,
   CommandType,
+  CreateGameResponse,
   UpdateRoomResponse,
   UpdateWinnersResponse,
 } from '../types';
@@ -83,6 +84,16 @@ export const sendUpdateRoom = async (
 ): Promise<void> => {
   await sendCommandResponse<'update_room'>(ws, {
     type: 'update_room',
+    data,
+  });
+};
+
+export const sendCreateGame = async (
+  ws: Iterable<WebSocket> | WebSocket,
+  data: CreateGameResponse['data'],
+): Promise<void> => {
+  await sendCommandResponse<'create_game'>(ws, {
+    type: 'create_game',
     data,
   });
 };

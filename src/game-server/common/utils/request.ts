@@ -8,8 +8,16 @@ export const isLikeCommandRequest = (req: unknown): req is CommandRequestWithStr
   return hasOwnKeys<CommandRequestWithStrigifiedData>(req, 'type', 'data', 'id') && isStr(req.data);
 };
 
-export const parseCommandRequest = <T extends CommandType>(buf: RawData): CommandRequest<T> => {
-  const req = JSONParse(buf.toString('utf-8'));
+type ParseCommandRequestResult<T extends CommandType> = {
+  parsed: CommandRequest<T>;
+  stringified: string;
+};
+
+export const parseCommandRequest = <T extends CommandType>(
+  buf: RawData,
+): ParseCommandRequestResult<T> => {
+  const stringified = buf.toString();
+  const req = JSONParse(stringified);
 
   // with stringified data
   if (!isLikeCommandRequest(req)) {
@@ -21,5 +29,8 @@ export const parseCommandRequest = <T extends CommandType>(buf: RawData): Comman
   if (parsedData !== null && !isObject(parsedData)) {
     throw new Error(ErrorMessage.InvalidCommandRequest);
   }
-  return { ...req, data: parsedData } as CommandRequest<T>;
+  return {
+    parsed: { ...req, data: parsedData } as CommandRequest<T>,
+    stringified,
+  };
 };
