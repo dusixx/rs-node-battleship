@@ -8,6 +8,10 @@ export const isStr = (obj: unknown): obj is string => {
   return typeof obj === 'string';
 };
 
+export const isEmptyStr = (obj: unknown): obj is string => {
+  return !obj && isStr(obj);
+};
+
 export const hasOwnKeys = <T extends object>(obj: unknown, ...keys: (keyof T)[]): obj is T => {
   return isObject(obj) && keys.every(key => Object.hasOwn(obj, key));
 };
@@ -26,4 +30,12 @@ export const JSONParse = (s: string): unknown => {
 
 export const showError = (err: unknown): void => {
   console.log(red('Error: '), getErrorMessage(err));
+};
+
+export const getId = (): string => {
+  return crypto.randomUUID().replaceAll('-', '').slice(0, 12);
+};
+
+export const isIterable = <T>(v: unknown): v is Iterable<T> => {
+  return isObject(v) && Symbol.iterator in v && typeof v[Symbol.iterator] === 'function';
 };
