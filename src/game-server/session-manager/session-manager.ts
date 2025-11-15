@@ -1,5 +1,5 @@
 import { type RawData, type WebSocket, type WebSocketServer } from 'ws';
-import { cyan, yellow } from '../../common/utils/style';
+import { magenta, yellow } from '../../common/utils/style';
 import { ErrorMessage } from '../common/constants';
 import type { Credentials, UpdateRoomResponse, UpdateWinnersResponse } from '../common/types';
 import { parseCommandRequest } from '../common/utils/request';
@@ -11,9 +11,9 @@ import {
   sendUpdateWinners,
 } from '../common/utils/response';
 import { gray } from './../../common/utils/style';
-import type { GameFinishEventResult } from './game';
-import { Game, GameEvent } from './game';
-import { Room } from './room';
+import type { GameFinishEventResult } from './game/game';
+import { Game, GameEvent } from './game/game';
+import { Room } from './room/room';
 
 export type Player = Credentials & {
   wins: number;
@@ -45,7 +45,7 @@ export class SessionManager {
     const { parsed, stringified } = parseCommandRequest(rawData);
 
     const clientId = this.clients.get(ws)?.name ?? 'client';
-    console.log(cyan(`[${clientId}]:`), yellow(`${parsed.type}:`), gray(stringified));
+    console.log(magenta(`[${clientId}]:`), yellow(`${parsed.type}:`), gray(stringified));
 
     switch (parsed.type) {
       case 'reg': {
@@ -97,11 +97,8 @@ export class SessionManager {
   };
 
   private initGame = (game: Game): void => {
-    game.on(GameEvent.Finish, ({ /*winner,*/ game }: GameFinishEventResult) => {
-      // const player = this.players.get(winner.name);
-      // if (player) {
-      //   player.wins += 1;
-      // }
+    game.on(GameEvent.Finish, ({ game, winner }: GameFinishEventResult) => {
+      winner.wins += 1;
       this.games.delete(game.id);
       this.rooms.delete(game.id);
       void sendUpdateWinners(this.clients.keys(), this.getWinners());
@@ -123,7 +120,6 @@ export class SessionManager {
   private createRoom = (ws: WebSocket): void => {
     const player = this.clients.get(ws);
     if (player) {
-      // TODO: or exit - create a new one and delete the current one if it is empty after exiting?
       for (const room of this.rooms.values()) {
         if (room.has(player)) {
           return;
@@ -189,6 +185,7 @@ export class SessionManager {
     if (player) {
       player.online = false;
 
+      // cleanup
       this.rooms.forEach(room => {
         // remove player from room
         room.remove(player);
@@ -208,7 +205,7 @@ export class SessionManager {
   };
 
   private handleConnection = (ws: WebSocket): void => {
-    console.log('Client connected');
+    console.log('client connected');
 
     this.clients.set(ws, undefined);
 
@@ -216,7 +213,7 @@ export class SessionManager {
       this.handleMessage(ws, data);
     });
     ws.on('close', () => {
-      console.log('Client disconnected');
+      console.log('client disconnected');
       this.handleClose(ws);
     });
   };
