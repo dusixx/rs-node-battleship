@@ -39,3 +39,7 @@ export const getId = (): string => {
 export const isIterable = <T>(v: unknown): v is Iterable<T> => {
   return isObject(v) && Symbol.iterator in v && typeof v[Symbol.iterator] === 'function';
 };
+
+export const rndInt = (min: number, max: number): number => {
+  return Math.round(min + Math.random() * (max - min));
+};
