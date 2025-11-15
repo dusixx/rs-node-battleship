@@ -10,7 +10,9 @@ import {
   sendUpdateRoom,
   sendUpdateWinners,
 } from '../common/utils/response';
-import { Game } from './game';
+import { gray } from './../../common/utils/style';
+import type { GameFinishEventResult } from './game';
+import { Game, GameEvent } from './game';
 import { Room } from './room';
 
 export type Player = Credentials & {
@@ -22,7 +24,7 @@ export type Player = Credentials & {
 export class SessionManager {
   private static instance: SessionManager | null = null;
   private wss: WebSocketServer | null = null;
-  private clients = new Map<WebSocket, Player | null>();
+  private clients = new Map<WebSocket, Player | undefined>();
   private players = new Map<string, Player>();
   private rooms = new Map<string, Room>();
   private games = new Map<string, Game>();
@@ -43,7 +45,7 @@ export class SessionManager {
     const { parsed, stringified } = parseCommandRequest(rawData);
 
     const clientId = this.clients.get(ws)?.name ?? 'client';
-    console.log(cyan(`\n${clientId}:`), yellow(`${parsed.type}:`), stringified);
+    console.log(cyan(`[${clientId}]:`), yellow(`${parsed.type}:`), gray(stringified));
 
     switch (parsed.type) {
       case 'reg': {
@@ -61,33 +63,61 @@ export class SessionManager {
     }
   };
 
-  // TODO: do not add urself
   private addUserToRoom = async (ws: WebSocket, indexRoom: string | number): Promise<void> => {
     const roomId = indexRoom.toString();
     const room = this.rooms.get(roomId);
     const player = this.clients.get(ws);
 
     if (player) {
+      // do not add urself
+      if (room?.has(player)) {
+        return;
+      }
       room?.add(player);
     }
-    if (!room || room.isAvailable) {
+    if (!room || room.players.length !== Room.PLAYERS_LIMIT) {
       return;
     }
     await sendUpdateRoom(this.clients.keys(), this.getAvailableRooms());
-    const idGame = this.createGame(roomId);
+    const success = this.createGame(roomId);
+    if (!success) {
+      return;
+    }
     for (const { ws, name } of room.players) {
-      await sendCreateGame(ws, { idGame, idPlayer: name });
+      await sendCreateGame(ws, { idGame: roomId, idPlayer: name });
     }
     this.rooms.delete(roomId);
+    // remove room created by the player
+    this.rooms.forEach(room => {
+      if (room.has(player) && room.players.length === 1) {
+        this.rooms.delete(room.id);
+      }
+    });
     await sendUpdateRoom(this.clients.keys(), this.getAvailableRooms());
   };
 
-  private createGame = (indexRoom: string | number): string => {
-    const gameId = indexRoom.toString();
-    const game = new Game(indexRoom.toString());
-    this.games.set(gameId, game);
+  private initGame = (game: Game): void => {
+    game.on(GameEvent.Finish, ({ /*winner,*/ game }: GameFinishEventResult) => {
+      // const player = this.players.get(winner.name);
+      // if (player) {
+      //   player.wins += 1;
+      // }
+      this.games.delete(game.id);
+      this.rooms.delete(game.id);
+      void sendUpdateWinners(this.clients.keys(), this.getWinners());
+    });
+  };
 
-    return gameId;
+  private createGame = (indexRoom: string | number): boolean => {
+    const room = this.rooms.get(indexRoom.toString());
+    if (!room) {
+      return false;
+    }
+    const game = new Game(room);
+    this.games.set(room.id, game);
+    this.initGame(game);
+
+    return true;
   };
 
   private createRoom = (ws: WebSocket): void => {
@@ -108,7 +138,7 @@ export class SessionManager {
 
   private getAvailableRooms = (): UpdateRoomResponse['data'] => {
     return [...this.rooms]
-      .filter(([, room]) => room.isAvailable)
+      .filter(([, room]) => room.players.length === 1)
       .map(([roomId, room]) => {
         return {
           roomId,
@@ -124,47 +154,70 @@ export class SessionManager {
   };
 
   private login = (ws: WebSocket, { name, password }: Credentials): void => {
-    const exists = this.players.get(name);
+    const existsPlayer = this.players.get(name);
 
-    if (exists?.online) {
-      void sendLoginError(ws, ErrorMessage.PlayerAlreadyOnline);
-      return;
+    // signin
+    if (existsPlayer) {
+      if (existsPlayer.online) {
+        void sendLoginError(ws, ErrorMessage.PlayerAlreadyOnline);
+        return;
+      }
+      if (existsPlayer.password !== password) {
+        void sendLoginError(ws, ErrorMessage.InvalidPassword);
+        return;
+      }
+      existsPlayer.ws = ws;
+      existsPlayer.online = true;
+      this.clients.set(ws, existsPlayer);
+      // signup
+    } else {
+      const player = { name, password, online: true, wins: 0, ws };
+      this.players.set(name, player);
+      this.clients.set(ws, player);
     }
-    if (exists && exists.password !== password) {
-      void sendLoginError(ws, ErrorMessage.InvalidPassword);
-      return;
-    }
-    const player = { name, password, online: true, wins: 0, ws };
-    this.players.set(name, player);
-    this.clients.set(ws, player);
-
     this.sendLoginSuccessResponse(ws, name);
   };
 
   private sendLoginSuccessResponse = (ws: WebSocket, name: string): void => {
     void sendLoginSuccess(ws, name);
-    // broadcast
     void sendUpdateRoom(this.clients.keys(), this.getAvailableRooms());
     void sendUpdateWinners(this.clients.keys(), this.getWinners());
   };
 
-  // private handleClientDisconnect = (): void => {};
+  private handleClose = (ws: WebSocket): void => {
+    const player = this.clients.get(ws);
+    if (player) {
+      player.online = false;
+
+      this.rooms.forEach(room => {
+        // remove player from room
+        room.remove(player);
+        // remove room if nobody inside
+        if (!room.players.length) {
+          this.rooms.delete(room.id);
+        }
+      });
+      // remove game with given player
+      this.games.forEach(game => {
+        if (game.has(player)) {
+          this.games.delete(game.id);
+        }
+      });
+    }
+    this.clients.delete(ws);
+  };
 
   private handleConnection = (ws: WebSocket): void => {
-    console.log('\nClient connected');
+    console.log('Client connected');
 
-    this.clients.set(ws, null);
+    this.clients.set(ws, undefined);
 
     ws.on('message', data => {
       this.handleMessage(ws, data);
     });
     ws.on('close', () => {
-      // TODO: need cleanup (collections)
-      const player = this.clients.get(ws);
-      if (player) {
-        player.online = false;
-      }
-      this.clients.delete(ws);
+      console.log('Client disconnected');
+      this.handleClose(ws);
     });
   };
 }
