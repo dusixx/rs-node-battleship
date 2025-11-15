@@ -1,12 +1,13 @@
 import type { RoomUsers } from '../common/types';
+import { isStr } from './../../common/utils/index';
 import type { Player } from './session-manager';
 
 export class Room {
-  public static PlayersLimit = 2;
+  public static PLAYERS_LIMIT = 2;
   private _players: Player[] = [];
 
   constructor(
-    private id: string,
+    private _id: string,
     player?: Player,
   ) {
     if (player) {
@@ -22,22 +23,23 @@ export class Room {
     return this._players.map(({ name }) => ({ name, index: name }));
   }
 
-  public get roomId(): string {
-    return this.id;
-  }
-
-  public get isAvailable(): boolean {
-    return this._players.length < Room.PlayersLimit;
+  public get id(): string {
+    return this._id;
   }
 
   public add(player: Player): void {
-    if (this._players.length < Room.PlayersLimit) {
+    if (this._players.length < Room.PLAYERS_LIMIT) {
       this._players.push(player);
     }
   }
 
-  public has(player: Player): boolean {
-    return Boolean(this._players.find(p => p.name === player.name));
+  public has(player?: Player | string): boolean {
+    return Boolean(
+      this._players.find(p => {
+        const name = isStr(player) ? player : player?.name;
+        return p.name === name;
+      }),
+    );
   }
 
   public remove(player: Player): void {
