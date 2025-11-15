@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { WebSocket as Websock } from 'ws';
 
 declare namespace NodeJS {
@@ -16,3 +17,4 @@ type WithRequired<Type, Key extends keyof Type> = Type & Required<Pick<Type, Key
 type Mutable<T> = { -readonly [P in keyof T]: T[P] };
 type Throwable = (err: unknown) => never;
 type Either<T = never> = T extends never ? unknown : T;
+type AnyFunction<T = any, R = any> = (...args: T[]) => R;

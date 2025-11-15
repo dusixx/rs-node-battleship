@@ -3,6 +3,7 @@ import { isIterable } from '../../../common/utils';
 import { cyan, gray, yellow } from '../../../common/utils/style';
 import type { WithOptional } from '../../../global';
 import type {
+  AttackResponse,
   CommandResponse,
   CommandType,
   CreateGameResponse,
@@ -40,7 +41,7 @@ export const sendCommandResponse = async <T extends CommandType>(
   for (const ws of webSocket) {
     if (ws.readyState === ws.OPEN) {
       await send(ws, stringified);
-      console.log(cyan(`[server]:`), yellow(`${response.type}:`), gray(stringified));
+      console.log(cyan('[server]:'), yellow(`${response.type}:`), gray(stringified));
     }
   }
 };
@@ -125,12 +126,22 @@ export const sendFinishGame = async (
   });
 };
 
-export const sendTurnPlayer = async (
+export const sendTurn = async (
   ws: Iterable<WebSocket> | WebSocket,
   name: string,
 ): Promise<void> => {
   await sendCommandResponse<'turn'>(ws, {
     type: 'turn',
     data: { currentPlayer: name },
+  });
+};
+
+export const sendAttack = async (
+  ws: Iterable<WebSocket> | WebSocket,
+  data: AttackResponse['data'],
+): Promise<void> => {
+  await sendCommandResponse<'attack'>(ws, {
+    type: 'attack',
+    data,
   });
 };

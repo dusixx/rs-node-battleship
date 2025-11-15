@@ -8,6 +8,7 @@ export const red = style.bind(null, 'red');
 export const yellow = style.bind(null, 'yellow');
 export const green = style.bind(null, 'green');
 export const gray = style.bind(null, 'gray');
+export const magenta = style.bind(null, 'magenta');
 
 export const stylizeHttpStatus = (result: number): string => {
   if (result < 200) {
