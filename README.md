@@ -1,19 +1,18 @@
 ## 🚀 Install & Run
 
 ```sh
+# install
 git clone git@github.com:dusixx/rs-node-battleship.git
 cd rs-node-battleship
 git checkout dev
 npm i
 ```
 
-### Run
-
 ```sh
-# in production mode (both `Wensocket` and `Http` servers)
-npm run start
+# run in production mode (both `WebSocket` and `Http` servers)
+npm start
 
-# in dev mode (both `Wensocket` and `Http` servers)
+# run in dev mode (both `WebSocket` and `Http` servers)
 npm run start:dev
 ```
 
@@ -23,13 +22,15 @@ You'll find `HTTP_PORT` in the `.env` file.
 
 By default `HTTP_PORT=8181`
 
-### ℹ️ NOTES
+## ℹ️ Notes
 
 Keep in mind that the `game bot` isn't very smart.
 
-It doesn't understand that when it hits, it should hit adjacent cells to kill.
+It doesn't hit neighboring cells to kill.
 
 But it never hits the same cell twice.
+
+Have fun!
 
 ## 🆘 In case something goes wrong
 
