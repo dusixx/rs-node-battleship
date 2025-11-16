@@ -1,7 +1,7 @@
 import type WebSocket from 'ws';
 import { isIterable } from '../../../common/utils';
 import { cyan, gray, yellow } from '../../../common/utils/style';
-import type { WithOptional } from '../../../global';
+import type { WithOptional } from '../../../common/utils/types';
 import type {
   AttackResponse,
   CommandResponse,

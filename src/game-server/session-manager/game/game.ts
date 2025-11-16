@@ -2,7 +2,8 @@ import EventEmitter from 'node:events';
 import { type RawData, type WebSocket } from 'ws';
 import { sleep } from '../../../common/utils';
 import { green } from '../../../common/utils/style';
-import type { AnyFunction } from '../../../global';
+import type { AnyFunction } from '../../../common/utils/types';
+import { BOT_ALIAS, BOT_ATTACK_DELAY, GameEvent } from '../../common/data/constants';
 import type {
   AddShipsRequest,
   AttackRequest,
@@ -15,19 +16,13 @@ import { Room } from '../room/room';
 import type { Player } from '../session-manager';
 import { Fleet } from './fleet/fleet';
 
-const BOT_ATTACK_DELAY = 250;
-
-export const GameEvent = {
-  Finish: 'finish',
-};
+type PlayerEventName = 'message' | 'close';
 
 export type GameFinishEventResult = {
   winner: Player;
   game: Game;
   bot?: Player;
 };
-
-type PlayerEventName = 'message' | 'close';
 
 export class Game extends EventEmitter {
   private _room;
@@ -69,7 +64,7 @@ export class Game extends EventEmitter {
     if (!player) {
       return;
     }
-    console.log(green('[game]:'), 'winner is', player.isBot ? 'bot' : player.name);
+    console.log(green('[game]:'), 'winner is', player.isBot ? BOT_ALIAS : player.name);
 
     await sendFinishGame(this.getClients(), player.name);
     // TODO: need to type
@@ -200,10 +195,12 @@ export class Game extends EventEmitter {
     }
     // bot attack
     if (this.bot && this.currentAttackingPlayerName === this.bot.name) {
-      const data = JSON.stringify({ gameId, indexPlayer: this.bot.name });
-      const req = { id: 0, type: 'randomAttack', data };
-      const bot = this.bot;
-
+      const { bot } = this;
+      const req = {
+        id: 0,
+        type: 'randomAttack',
+        data: JSON.stringify({ gameId, indexPlayer: bot.name }),
+      };
       await sendTurn(this.getClients(), this.currentAttackingPlayerName);
       await sleep(BOT_ATTACK_DELAY);
       bot.ws.emit('message', JSON.stringify(req));

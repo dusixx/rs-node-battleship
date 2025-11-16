@@ -1,7 +1,7 @@
 import { WebSocket, type RawData, type WebSocketServer } from 'ws';
 import { getId, hasOwnKeys, rndInt, showError } from '../../common/utils';
 import { gray, magenta, yellow } from '../../common/utils/style';
-import { ErrorMessage } from '../common/data/constants';
+import { BOT_ALIAS, ErrorMessage, GameEvent } from '../common/data/constants';
 import type {
   AddShipsRequest,
   Credentials,
@@ -16,16 +16,16 @@ import {
   sendUpdateRoom,
   sendUpdateWinners,
 } from '../common/utils/response';
+import { DEF_WS_PORT } from './../common/data/constants';
 
 import { config } from 'dotenv';
 import { fleets } from '../common/data/fleets.data';
 import type { GameFinishEventResult } from './game/game';
-import { Game, GameEvent } from './game/game';
+import { Game } from './game/game';
 import { Room } from './room/room';
 
 config({ quiet: true });
 
-const BOT_ALIAS = '#bot';
 const { WS_PORT } = process.env;
 
 export type Player = Credentials & {
@@ -93,7 +93,9 @@ export class SessionManager {
       return;
     }
     const address = this.wss.address();
-    const port = hasOwnKeys(address, 'port') ? address.port : address || Number(WS_PORT) || 3000;
+    const port = hasOwnKeys(address, 'port')
+      ? address.port
+      : address || Number(WS_PORT) || DEF_WS_PORT;
     const ws = new WebSocket(`ws://localhost:${port}`);
 
     const bot: Player = {
@@ -285,7 +287,7 @@ export class SessionManager {
   };
 
   private handleConnection = (ws: WebSocket): void => {
-    console.log('someone connected');
+    console.log('Someone connected');
 
     this.clients.set(ws, undefined);
 
