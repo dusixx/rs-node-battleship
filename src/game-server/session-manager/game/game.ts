@@ -79,16 +79,13 @@ export class Game extends EventEmitter {
     return this.room.players.map(({ ws }) => ws);
   };
 
-  private handleMessage = (_ws: WebSocket, rawData: RawData): void => {
+  private handleMessage = (ws: WebSocket, rawData: RawData): void => {
     const { parsed } = parseCommandRequest(rawData);
 
-    console.log(green('[game]:'), this.room.findPlayer(_ws)?.name, parsed.type);
+    console.log(green('[game]:'), this.room.findPlayer(ws)?.name, parsed.type);
 
     switch (parsed.type) {
       case 'add_ships': {
-        if (this.bot) {
-          console.log(green('[game]:'), 'launching, please wait...');
-        }
         this.addShips(parsed.data);
         return;
       }
