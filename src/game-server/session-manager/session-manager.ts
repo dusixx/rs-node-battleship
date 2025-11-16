@@ -1,10 +1,11 @@
 import { WebSocket, type RawData, type WebSocketServer } from 'ws';
 import { getId, hasOwnKeys, rndInt, showError } from '../../common/utils';
-import { gray, magenta, yellow } from '../../common/utils/style';
+import { cyan, gray, magenta, yellow } from '../../common/utils/style';
 import { BOT_ALIAS, ErrorMessage, GameEvent } from '../common/data/constants';
 import type {
   AddShipsRequest,
   Credentials,
+  ShipInfo,
   UpdateRoomResponse,
   UpdateWinnersResponse,
 } from '../common/types';
@@ -120,15 +121,17 @@ export class SessionManager {
   };
 
   private addBotShips = (bot: Player): void => {
+    const idx = rndInt(0, fleets.length - 1);
     const req: AddShipsRequest = {
       id: 0,
       type: 'add_ships',
       data: {
         gameId: bot.name,
         indexPlayer: bot.name,
-        ships: fleets[rndInt(0, fleets.length - 1)]!,
+        ships: (fleets as ShipInfo[][])[idx]!,
       },
     };
+    console.log(gray(`[debug]: fleet [${idx}]`));
     const obj = { ...req, data: JSON.stringify(req.data) };
     bot.ws.emit('message', JSON.stringify(obj));
   };
@@ -287,7 +290,7 @@ export class SessionManager {
   };
 
   private handleConnection = (ws: WebSocket): void => {
-    console.log('Someone connected');
+    console.log(cyan('[server]:'), 'someone connected');
 
     this.clients.set(ws, undefined);
 
@@ -296,7 +299,7 @@ export class SessionManager {
     });
     ws.on('close', () => {
       const clientId = this.clients.get(ws)?.name ?? BOT_ALIAS;
-      console.log(magenta(clientId), 'disconnected');
+      console.log(cyan('[server]:'), magenta(clientId), 'disconnected');
       this.handleClose(ws);
     });
   };

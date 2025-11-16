@@ -64,7 +64,7 @@ export class Game extends EventEmitter {
     if (!player) {
       return;
     }
-    console.log(green('[game]:'), 'winner is', player.isBot ? BOT_ALIAS : player.name);
+    console.log(green('[game]:'), player.isBot ? BOT_ALIAS : player.name, 'won');
 
     await sendFinishGame(this.getClients(), player.name);
     // TODO: need to type
