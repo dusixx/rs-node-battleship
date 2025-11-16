@@ -66,7 +66,7 @@ export class Game extends EventEmitter {
     }
     console.log(
       green(`[game]:`),
-      gray(`[owner=${this.id}]:`),
+      gray(`(${this.id})`),
       player.isBot ? BOT_ALIAS : player.name,
       'won',
     );
@@ -89,7 +89,7 @@ export class Game extends EventEmitter {
 
     console.log(
       green(`[game]:`),
-      gray(`[owner=${this.id}]:`),
+      gray(`(${this.id})`),
       this.room.findPlayer(ws)?.name,
       parsed.type,
     );
@@ -145,7 +145,6 @@ export class Game extends EventEmitter {
     const { gameId, x, y, indexPlayer } = data;
     const attackingPlayerName = indexPlayer.toString();
 
-    // invalid gameId or player
     if (this.id !== gameId || !this.room.has(attackingPlayerName)) {
       return;
     }
@@ -158,8 +157,7 @@ export class Game extends EventEmitter {
       return;
     }
     const attackedPlayerName = attackedFleet.playerName;
-    const attackedPosition = random ? attackedFleet.getValidRandomPosition() : { x, y };
-    const attackResult = attackedFleet.attack(attackedPosition);
+    const attackResult = attackedFleet.attack(random ? undefined : { x, y });
 
     const { status, position, around, defeat } = attackResult;
 

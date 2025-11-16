@@ -45,11 +45,8 @@ export class Fleet {
     };
   }
 
-  public randomAttack(): AttackResult {
-    return this.attack(this.getValidRandomPosition());
-  }
-
-  public attack({ x, y }: Position): AttackResult {
+  public attack(pos: Position = this.getValidRandomPosition()): AttackResult {
+    const { x, y } = pos;
     const strPos: XYPair = `${x},${y}`;
     const foundBoat = this.boats.find(({ body }) => body.has(strPos));
 

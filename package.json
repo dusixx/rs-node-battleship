@@ -1,7 +1,7 @@
 {
-  "name": "ws_task",
+  "name": "ws_battleship_sever",
   "version": "1.0.0",
-  "description": "Template for the WebSocket remote control task",
+  "description": "Websocket battleship server",
   "main": "index.js",
   "scripts": {
     "start:http": "nodemon --watch src --ext ts --exec ts-node src/http-server/index.ts",
@@ -17,8 +17,12 @@
     "lint": "eslint ./src",
     "lint:fix": "npm run lint --fix"
   },
-  "author": "",
-  "keywords": [],
+  "author": "dusixx",
+  "keywords": [
+    "Websocket",
+    "Server",
+    "Battleship"
+  ],
   "license": "ISC",
   "husky": {
     "hooks": {

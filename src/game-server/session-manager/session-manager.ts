@@ -131,7 +131,7 @@ export class SessionManager {
         ships: (fleets as ShipInfo[][])[idx]!,
       },
     };
-    console.log(gray(`[debug]: fleet [${idx}]`));
+    console.log(gray(`[debug]: fleet (${idx})`));
     const obj = { ...req, data: JSON.stringify(req.data) };
     bot.ws.emit('message', JSON.stringify(obj));
   };
