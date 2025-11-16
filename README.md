@@ -7,7 +7,7 @@ git checkout dev
 npm i
 ```
 
-#### Run
+### Run
 
 ```sh
 # in production mode (both `Wensocket` and `Http` servers)
@@ -21,6 +21,14 @@ Enter `http://localhost:[HTTP_PORT]` in your browser.
 You'll find `HTTP_PORT` in the `.env` file.
 
 By default `HTTP_PORT=8181`
+
+### ℹ️ NOTES
+
+Keep in mind that the `game bot` isn't very smart.
+
+It doesn't understand that when it hits, it should hit adjacent cells to kill.
+
+But it never hits the same cell twice.
 
 ## 🆘 In case something goes wrong
 
