@@ -17,7 +17,9 @@ npm run start:dev
 ```
 
 Enter `http://localhost:[HTTP_PORT]` in your browser.
+
 You'll find `HTTP_PORT` in the `.env` file.
+
 By default `HTTP_PORT=8181`
 
 ## 🆘 In case something goes wrong
