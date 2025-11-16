@@ -10,10 +10,10 @@ npm i
 #### Run
 
 ```sh
-# in dev mode (both `Wensocket` and `Http` servers)
-npm start:dev
 # in production mode (both `Wensocket` and `Http` servers)
 npm run start
+# in dev mode (both `Wensocket` and `Http` servers)
+npm run start:dev
 ```
 
 Enter `http://localhost:[HTTP_PORT]` in your browser.
