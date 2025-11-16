@@ -15,7 +15,7 @@ import { Room } from '../room/room';
 import type { Player } from '../session-manager';
 import { Fleet } from './fleet/fleet';
 
-const BOT_ATTACK_DELAY = 500;
+const BOT_ATTACK_DELAY = 250;
 
 export const GameEvent = {
   Finish: 'finish',
@@ -69,7 +69,7 @@ export class Game extends EventEmitter {
     if (!player) {
       return;
     }
-    console.log(green('game:'), 'winner is', player.isBot ? 'bot' : player.name);
+    console.log(green('[game]:'), 'winner is', player.isBot ? 'bot' : player.name);
 
     await sendFinishGame(this.getClients(), player.name);
     // TODO: need to type
@@ -87,10 +87,13 @@ export class Game extends EventEmitter {
   private handleMessage = (_ws: WebSocket, rawData: RawData): void => {
     const { parsed } = parseCommandRequest(rawData);
 
-    console.log(green('game: '), this.room.findPlayer(_ws)?.name, parsed.type);
+    console.log(green('[game]:'), this.room.findPlayer(_ws)?.name, parsed.type);
 
     switch (parsed.type) {
       case 'add_ships': {
+        if (this.bot) {
+          console.log(green('[game]:'), 'launching, please wait...');
+        }
         this.addShips(parsed.data);
         return;
       }

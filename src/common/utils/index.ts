@@ -33,7 +33,7 @@ export const showError = (err: unknown): void => {
 };
 
 export const getId = (): string => {
-  return crypto.randomUUID().replaceAll('-', '').slice(0, 12);
+  return crypto.randomUUID().replaceAll('-', '').slice(0, 8);
 };
 
 export const isIterable = <T>(v: unknown): v is Iterable<T> => {

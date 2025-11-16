@@ -25,6 +25,7 @@ import { Room } from './room/room';
 
 config({ quiet: true });
 
+const BOT_ALIAS = '#bot';
 const { WS_PORT } = process.env;
 
 export type Player = Credentials & {
@@ -64,7 +65,7 @@ export class SessionManager {
     }
     const { parsed, stringified } = parsedResult;
 
-    const clientId = this.clients.get(ws)?.name ?? 'bot';
+    const clientId = this.clients.get(ws)?.name ?? BOT_ALIAS;
     console.log(magenta(`[${clientId}]:`), yellow(`${parsed.type}:`), gray(stringified));
 
     switch (parsed.type) {
@@ -95,7 +96,14 @@ export class SessionManager {
     const port = hasOwnKeys(address, 'port') ? address.port : address || Number(WS_PORT) || 3000;
     const ws = new WebSocket(`ws://localhost:${port}`);
 
-    const bot: Player = { name: getId(), password: '', online: true, isBot: true, wins: 0, ws };
+    const bot: Player = {
+      name: `bot-${getId()}`,
+      password: '',
+      online: true,
+      isBot: true,
+      wins: 0,
+      ws,
+    };
     this.clients.set(ws, bot);
     this.players.set(bot.name, bot);
 
@@ -234,6 +242,10 @@ export class SessionManager {
       this.clients.set(ws, existsPlayer);
       // signup
     } else {
+      if (!/^[a-z][a-z0-9]+$/i.test(name)) {
+        void sendLoginError(ws, ErrorMessage.LoginAllowed);
+        return;
+      }
       const player = { name, password, online: true, wins: 0, ws };
       this.players.set(name, player);
       this.clients.set(ws, player);
@@ -273,7 +285,7 @@ export class SessionManager {
   };
 
   private handleConnection = (ws: WebSocket): void => {
-    console.log('client connected');
+    console.log('someone connected');
 
     this.clients.set(ws, undefined);
 
@@ -281,7 +293,7 @@ export class SessionManager {
       this.handleMessage(ws, data);
     });
     ws.on('close', () => {
-      const clientId = this.clients.get(ws)?.name ?? 'bot';
+      const clientId = this.clients.get(ws)?.name ?? BOT_ALIAS;
       console.log(magenta(clientId), 'disconnected');
       this.handleClose(ws);
     });

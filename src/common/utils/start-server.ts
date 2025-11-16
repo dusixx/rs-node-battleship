@@ -9,9 +9,7 @@ const execAsync = promisify(exec);
 
 const tryKillTask = async (pid: string | number): Promise<void> => {
   try {
-    // await execAsync('chcp 65001', { encoding: 'utf8' });
-    /* const { stdout, stderr } = */ await execAsync(`taskkill /f /pid ${pid}`);
-    // console.log(stdout || stderr);
+    await execAsync(`taskkill /f /pid ${pid}`);
   } catch {
     void 0;
   }
