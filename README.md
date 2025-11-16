@@ -1,34 +1,32 @@
-# RSSchool NodeJS websocket task template
+## 🚀 Install & Run
 
-> Static http server and base task packages.
-> By default WebSocket client tries to connect to the 3000 port.
+```sh
+git clone git@github.com:dusixx/rs-node-battleship.git
+cd rs-node-battleship
+git checkout dev
+npm i
+```
 
-## Installation
+#### Run
 
-1. Clone/download repo
-2. `npm install`
+```sh
+# in dev mode (both `Wensocket` and `Http` servers)
+npm start:dev
+# in production mode (both `Wensocket` and `Http` servers)
+npm run start
+```
 
-## Usage
+Enter `http://localhost:[HTTP_PORT]` in your browser.
+You'll find `HTTP_PORT` in the `.env` file.
+By default `HTTP_PORT=8181`
 
-**Development**
+## 🆘 In case something goes wrong
 
-`npm run start:dev`
+to `kill` the node, enter in the `OS terminal`
 
-- App served @ `http://localhost:8181` with nodemon
-
-**Production**
-
-`npm run start`
-
-- App served @ `http://localhost:8181` without nodemon
-
----
-
-**All commands**
-
-| Command             | Description                                          |
-| ------------------- | ---------------------------------------------------- |
-| `npm run start:dev` | App served @ `http://localhost:8181` with nodemon    |
-| `npm run start`     | App served @ `http://localhost:8181` without nodemon |
-
-**Note**: replace `npm` with `yarn` in `package.json` if you use yarn.
+```sh
+# for win32 platforms
+taskkill /f /im node.exe
+# for *nix platforms
+killall -9 node
+```
