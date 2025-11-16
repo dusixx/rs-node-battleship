@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-base-to-string */
 import type { RawData } from 'ws';
 import { hasOwnKeys, isObject, isStr, JSONParse } from '../../../common/utils';
-import { ErrorMessage } from '../constants';
+import { ErrorMessage } from '../data/constants';
 import type { CommandRequest, CommandRequestWithStrigifiedData, CommandType } from '../types';
 
 export const isLikeCommandRequest = (req: unknown): req is CommandRequestWithStrigifiedData => {

@@ -43,3 +43,7 @@ export const isIterable = <T>(v: unknown): v is Iterable<T> => {
 export const rndInt = (min: number, max: number): number => {
   return Math.round(min + Math.random() * (max - min));
 };
+
+export const sleep = async (ms: number): Promise<void> => {
+  return new Promise(r => setTimeout(r, ms));
+};

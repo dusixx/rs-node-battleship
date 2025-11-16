@@ -12,7 +12,7 @@ import type {
   UpdateWinnersResponse,
 } from '../types';
 
-const send = async (ws: WebSocket, data: string): Promise<void> => {
+export const send = async (ws: WebSocket, data: string): Promise<void> => {
   await new Promise<void>((resolve, reject) => {
     ws.send(data, err => {
       if (err) {

@@ -73,6 +73,10 @@ export type CreateRoomRequest = Command<'create_room'> & {
   data: '';
 };
 
+export type SinglePlayRequest = Command<'single_play'> & {
+  data: '';
+};
+
 export type AddUserToRoomRequest = Command<'add_user_to_room'> & {
   data: {
     indexRoom: number | string; // room id
@@ -166,7 +170,9 @@ export type CommandRequest<T extends CommandType> = T extends 'reg'
           ? AttackRequest
           : T extends 'randomAttack'
             ? RandomAttackRequest
-            : never;
+            : T extends 'single_play'
+              ? SinglePlayRequest
+              : never;
 
 export type CommandResponse<T extends CommandType> = T extends 'reg'
   ? PlayerLoginResponse
