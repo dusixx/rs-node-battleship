@@ -1,7 +1,7 @@
 /* eslint-disable prefer-const */
 import type { Position, ShipInfo } from '../../../common/types';
 
-const FIELD_SIZE = 10;
+export const FIELD_SIZE = 10;
 
 type GetCellsResult = {
   body: Position[];

@@ -1,8 +1,11 @@
+import { rndInt } from '../../../../common/utils';
 import type { AttackResponse, Position, ShipInfo } from '../../../common/types';
-import { getCells } from './fleet.utils';
+import { FIELD_SIZE, getCells } from './fleet.utils';
+
+type XYPair = `${number},${number}`;
 
 type Boat = {
-  body: Set<string>; // {"1,2", "1,4"...}
+  body: Set<XYPair>; // {"1,2", "1,4"...}
   around: Position[]; // cells around [{1,2},{1,3},...]
 };
 
@@ -15,13 +18,13 @@ export type AttackResult =
 
 export class Fleet {
   private _boats: Boat[] = [];
-  private touched = new Set<string>();
+  private availableCells = new Set<XYPair>();
 
   constructor(
     private _playerName: string,
     shipsInfo: ShipInfo[],
   ) {
-    this.parseShipsInfos(shipsInfo);
+    this.init(shipsInfo);
   }
 
   public get playerName(): string {
@@ -32,17 +35,28 @@ export class Fleet {
     return Object.freeze(this._boats);
   }
 
-  /**
-   * return undefined if already touched cell is attacked
-   */
+  public getValidRandomPosition(): Position {
+    const idx = rndInt(0, this.availableCells.size - 1);
+    const pos = [...this.availableCells][idx];
+    const [x, y] = (pos ?? '').split(',');
+    return {
+      x: Number(x ?? -1),
+      y: Number(y ?? -1),
+    };
+  }
+
+  public randomAttack(): AttackResult {
+    return this.attack(this.getValidRandomPosition());
+  }
+
   public attack({ x, y }: Position): AttackResult {
-    const strPos = `${x},${y}`;
+    const strPos: XYPair = `${x},${y}`;
     const foundBoat = this.boats.find(({ body }) => body.has(strPos));
 
-    if (this.touched.has(strPos)) {
+    if (!this.availableCells.has(strPos)) {
       return { status: 'touched' };
     }
-    this.touched.add(strPos);
+    this.availableCells.delete(strPos);
 
     if (!foundBoat) {
       return {
@@ -63,6 +77,7 @@ export class Fleet {
     }
     // remove killed boat
     this._boats = this._boats.filter(b => b !== foundBoat);
+    this.removeAroundCellsFromAvailable(foundBoat.around);
     return {
       position: { x, y },
       status: 'killed',
@@ -71,10 +86,29 @@ export class Fleet {
     };
   }
 
+  private init(infos: ShipInfo[]): void {
+    this.parseShipsInfos(infos);
+    this.initAvailableCells();
+  }
+
+  private initAvailableCells = (): void => {
+    for (let i = 0; i < FIELD_SIZE; i += 1) {
+      for (let j = 0; j < FIELD_SIZE; j += 1) {
+        this.availableCells.add(`${i},${j}`);
+      }
+    }
+  };
+
+  private removeAroundCellsFromAvailable = (around: Position[]): void => {
+    for (const { x, y } of around) {
+      this.availableCells.delete(`${x},${y}`);
+    }
+  };
+
   private parseShipsInfos(infos: ShipInfo[]): void {
     for (const info of infos) {
       const boat: Boat = {
-        body: new Set<string>(),
+        body: new Set<XYPair>(),
         around: [],
       };
       const { body, around } = getCells(info);
