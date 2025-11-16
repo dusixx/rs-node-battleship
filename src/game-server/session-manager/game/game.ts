@@ -1,8 +1,8 @@
 import EventEmitter from 'node:events';
 import { type RawData, type WebSocket } from 'ws';
+import type { AnyFunction } from '../../../common/types';
 import { sleep } from '../../../common/utils';
 import { green } from '../../../common/utils/style';
-import type { AnyFunction } from '../../../common/utils/types';
 import { BOT_ALIAS, BOT_ATTACK_DELAY, GameEvent } from '../../common/data/constants';
 import type {
   AddShipsRequest,
