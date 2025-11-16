@@ -1,7 +1,13 @@
-import { type RawData, type WebSocket, type WebSocketServer } from 'ws';
-import { magenta, yellow } from '../../common/utils/style';
-import { ErrorMessage } from '../common/constants';
-import type { Credentials, UpdateRoomResponse, UpdateWinnersResponse } from '../common/types';
+import { WebSocket, type RawData, type WebSocketServer } from 'ws';
+import { getId, hasOwnKeys, rndInt, showError } from '../../common/utils';
+import { gray, magenta, yellow } from '../../common/utils/style';
+import { ErrorMessage } from '../common/data/constants';
+import type {
+  AddShipsRequest,
+  Credentials,
+  UpdateRoomResponse,
+  UpdateWinnersResponse,
+} from '../common/types';
 import { parseCommandRequest } from '../common/utils/request';
 import {
   sendCreateGame,
@@ -10,15 +16,22 @@ import {
   sendUpdateRoom,
   sendUpdateWinners,
 } from '../common/utils/response';
-import { gray } from './../../common/utils/style';
+
+import { config } from 'dotenv';
+import { fleets } from '../common/data/fleets.data';
 import type { GameFinishEventResult } from './game/game';
 import { Game, GameEvent } from './game/game';
 import { Room } from './room/room';
+
+config({ quiet: true });
+
+const { WS_PORT } = process.env;
 
 export type Player = Credentials & {
   wins: number;
   online: boolean;
   ws: WebSocket;
+  isBot?: boolean;
 };
 
 export class SessionManager {
@@ -42,9 +55,16 @@ export class SessionManager {
   }
 
   private handleMessage = (ws: WebSocket, rawData: RawData): void => {
-    const { parsed, stringified } = parseCommandRequest(rawData);
+    let parsedResult;
+    try {
+      parsedResult = parseCommandRequest(rawData);
+    } catch (err) {
+      showError(err);
+      return;
+    }
+    const { parsed, stringified } = parsedResult;
 
-    const clientId = this.clients.get(ws)?.name ?? 'client';
+    const clientId = this.clients.get(ws)?.name ?? 'bot';
     console.log(magenta(`[${clientId}]:`), yellow(`${parsed.type}:`), gray(stringified));
 
     switch (parsed.type) {
@@ -53,14 +73,54 @@ export class SessionManager {
         return;
       }
       case 'create_room': {
-        this.createRoom(ws);
+        void this.createRoom(ws);
         return;
       }
       case 'add_user_to_room': {
         void this.addUserToRoom(ws, parsed.data.indexRoom);
         return;
       }
+      case 'single_play': {
+        void this.handleSinglePlay(ws);
+        return;
+      }
     }
+  };
+
+  private handleSinglePlay = async (playerWebsocket: WebSocket): Promise<void> => {
+    if (!this.wss) {
+      return;
+    }
+    const address = this.wss.address();
+    const port = hasOwnKeys(address, 'port') ? address.port : address || Number(WS_PORT) || 3000;
+    const ws = new WebSocket(`ws://localhost:${port}`);
+
+    const bot: Player = { name: getId(), password: '', online: true, isBot: true, wins: 0, ws };
+    this.clients.set(ws, bot);
+    this.players.set(bot.name, bot);
+
+    const room = new Room(bot.name, bot);
+    this.rooms.set(bot.name, room);
+    const player = this.clients.get(playerWebsocket);
+    if (!player) {
+      return;
+    }
+    await this.addUserToRoom(playerWebsocket, room.id);
+    this.addBotShips(bot);
+  };
+
+  private addBotShips = (bot: Player): void => {
+    const req: AddShipsRequest = {
+      id: 0,
+      type: 'add_ships',
+      data: {
+        gameId: bot.name,
+        indexPlayer: bot.name,
+        ships: fleets[rndInt(0, fleets.length - 1)]!,
+      },
+    };
+    const obj = { ...req, data: JSON.stringify(req.data) };
+    bot.ws.emit('message', JSON.stringify(obj));
   };
 
   private addUserToRoom = async (ws: WebSocket, indexRoom: string | number): Promise<void> => {
@@ -97,10 +157,15 @@ export class SessionManager {
   };
 
   private initGame = (game: Game): void => {
-    game.on(GameEvent.Finish, ({ game, winner }: GameFinishEventResult) => {
+    game.on(GameEvent.Finish, ({ game, winner, bot }: GameFinishEventResult) => {
       winner.wins += 1;
       this.games.delete(game.id);
       this.rooms.delete(game.id);
+      // remove bot
+      if (bot) {
+        this.clients.delete(bot.ws);
+        this.players.delete(bot.name);
+      }
       void sendUpdateWinners(this.clients.keys(), this.getWinners());
     });
   };
@@ -117,7 +182,7 @@ export class SessionManager {
     return true;
   };
 
-  private createRoom = (ws: WebSocket): void => {
+  private createRoom = async (ws: WebSocket): Promise<string | undefined> => {
     const player = this.clients.get(ws);
     if (player) {
       for (const room of this.rooms.values()) {
@@ -128,7 +193,9 @@ export class SessionManager {
       const id = player.name;
       this.rooms.set(id, new Room(id, player));
 
-      void sendUpdateRoom(this.clients.keys(), this.getAvailableRooms());
+      await sendUpdateRoom(this.clients.keys(), this.getAvailableRooms());
+
+      return id;
     }
   };
 
@@ -182,6 +249,7 @@ export class SessionManager {
 
   private handleClose = (ws: WebSocket): void => {
     const player = this.clients.get(ws);
+
     if (player) {
       player.online = false;
 
@@ -213,7 +281,8 @@ export class SessionManager {
       this.handleMessage(ws, data);
     });
     ws.on('close', () => {
-      console.log('client disconnected');
+      const clientId = this.clients.get(ws)?.name ?? 'bot';
+      console.log(magenta(clientId), 'disconnected');
       this.handleClose(ws);
     });
   };
