@@ -2,7 +2,7 @@ import EventEmitter from 'node:events';
 import { type RawData, type WebSocket } from 'ws';
 import type { AnyFunction } from '../../../common/types';
 import { sleep } from '../../../common/utils';
-import { green } from '../../../common/utils/style';
+import { gray, green } from '../../../common/utils/style';
 import { BOT_ALIAS, BOT_ATTACK_DELAY, GameEvent } from '../../common/data/constants';
 import type {
   AddShipsRequest,
@@ -64,7 +64,12 @@ export class Game extends EventEmitter {
     if (!player) {
       return;
     }
-    console.log(green('[game]:'), player.isBot ? BOT_ALIAS : player.name, 'won');
+    console.log(
+      green(`[game]:`),
+      gray(`[owner=${this.id}]:`),
+      player.isBot ? BOT_ALIAS : player.name,
+      'won',
+    );
 
     await sendFinishGame(this.getClients(), player.name);
     // TODO: need to type
@@ -82,7 +87,12 @@ export class Game extends EventEmitter {
   private handleMessage = (ws: WebSocket, rawData: RawData): void => {
     const { parsed } = parseCommandRequest(rawData);
 
-    console.log(green('[game]:'), this.room.findPlayer(ws)?.name, parsed.type);
+    console.log(
+      green(`[game]:`),
+      gray(`[owner=${this.id}]:`),
+      this.room.findPlayer(ws)?.name,
+      parsed.type,
+    );
 
     switch (parsed.type) {
       case 'add_ships': {
