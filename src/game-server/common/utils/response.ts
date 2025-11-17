@@ -1,6 +1,5 @@
-import type WebSocket from 'ws';
+import WebSocket from 'ws';
 import type { WithOptional } from '../../../common/types';
-import { isIterable } from '../../../common/utils';
 import { cyan, gray, yellow } from '../../../common/utils/style';
 import type {
   AttackResponse,
@@ -35,7 +34,7 @@ export const sendCommandResponse = async <T extends CommandType>(
   };
   const stringified = JSON.stringify(body);
 
-  if (!isIterable(webSocket)) {
+  if (webSocket instanceof WebSocket) {
     webSocket = [webSocket];
   }
   for (const ws of webSocket) {
