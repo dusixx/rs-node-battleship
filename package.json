@@ -6,7 +6,7 @@
   "scripts": {
     "start:http": "nodemon --watch src --ext ts --exec ts-node src/http-server/index.ts",
     "start:ws": "nodemon --watch src --ext ts --exec ts-node src/game-server/ws-server/ws-server.ts",
-    "start:dev": "nodemon --watch src --ext ts --exec ts-node src/index.ts",
+    "dev": "nodemon --watch src --ext ts --exec ts-node src/index.ts",
     "start": "npm run build && node dist/index.js",
     "build": "tsc",
     "test": "echo not implemented",

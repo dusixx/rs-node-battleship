@@ -4,14 +4,14 @@ import type { AnyFunction } from '../../../common/types';
 import { sleep } from '../../../common/utils';
 import { gray, green } from '../../../common/utils/style';
 import { BOT_ALIAS, BOT_ATTACK_DELAY, GameEvent } from '../../common/constants';
-import type {
-  AddShipsRequest,
-  AttackRequest,
-  Position,
-  RandomAttackRequest,
-} from '../../common/types';
+import type { AddShipsRequest, AttackRequest, RandomAttackRequest } from '../../common/types';
 import { parseCommandRequest, stringifyRequest } from '../../common/utils/request';
-import { sendAttack, sendFinishGame, sendStartGame, sendTurn } from '../../common/utils/response';
+import {
+  sendAttack as _sendAttack,
+  sendFinishGame,
+  sendStartGame,
+  sendTurn,
+} from '../../common/utils/response';
 import { Room } from '../room/room';
 import type { Player } from '../session-manager.utils';
 import { Fleet } from './fleet/fleet';
@@ -80,6 +80,24 @@ export class Game extends EventEmitter {
     });
   }
 
+  public addShips(data: AddShipsRequest['data']): void {
+    const { indexPlayer, ships: shipsInfo, gameId } = data;
+
+    if (this.id !== gameId || this.fleets.size === Room.PLAYERS_LIMIT) {
+      return;
+    }
+    const playerName = indexPlayer.toString();
+    if (this.id !== gameId || !this.room.has(playerName)) {
+      return;
+    }
+    this.fleets.set(playerName, new Fleet(playerName, shipsInfo));
+    // both fleets where created
+    if (this.fleets.size === Room.PLAYERS_LIMIT) {
+      void sendStartGame(this.getClients(), { currentPlayerIndex: playerName, ships: shipsInfo });
+      void sendTurn(this.getClients(), playerName);
+    }
+  }
+
   private getClients = (): WebSocket[] => {
     return this.room.players.map(({ ws }) => ws);
   };
@@ -110,13 +128,6 @@ export class Game extends EventEmitter {
     }
   };
 
-  private handleRandomAttack = async ({
-    gameId,
-    indexPlayer,
-  }: RandomAttackRequest['data']): Promise<void> => {
-    await this.handleAttack({ gameId, indexPlayer, x: -1, y: -1 }, true);
-  };
-
   private isCurrentAttackingPlayer = (playerName: string): boolean => {
     return !this.currentAttackingPlayerName || this.currentAttackingPlayerName === playerName;
   };
@@ -128,17 +139,15 @@ export class Game extends EventEmitter {
     }
   };
 
-  private sendCellsAroundKilled = async (
-    attackingPlayerName: string,
-    around: Position[],
-  ): Promise<void> => {
-    for (const position of around) {
-      await sendAttack(this.getClients(), {
-        currentPlayer: attackingPlayerName,
-        status: 'miss',
-        position,
-      });
-    }
+  private sendAttack = async (data: Parameters<typeof _sendAttack>[1]): Promise<void> => {
+    await _sendAttack(this.getClients(), data);
+  };
+
+  private handleRandomAttack = async ({
+    gameId,
+    indexPlayer,
+  }: RandomAttackRequest['data']): Promise<void> => {
+    await this.handleAttack({ gameId, indexPlayer, x: -1, y: -1 }, true);
   };
 
   private handleAttack = async (data: AttackRequest['data'], random?: boolean): Promise<void> => {
@@ -158,36 +167,22 @@ export class Game extends EventEmitter {
     }
     const attackedPlayerName = attackedFleet.playerName;
     const attackResult = attackedFleet.attack(random ? undefined : { x, y });
-
     const { status, position, around, defeat } = attackResult;
 
     switch (status) {
       case 'miss': {
         this.currentAttackingPlayerName = attackedPlayerName;
-        await sendAttack(this.getClients(), {
-          currentPlayer: attackingPlayerName,
-          status,
-          position,
-        });
+        await this.sendAttack({ currentPlayer: attackingPlayerName, status, position });
         break;
       }
       case 'shot': {
         this.currentAttackingPlayerName = attackingPlayerName;
-        await sendAttack(this.getClients(), {
-          currentPlayer: attackingPlayerName,
-          status,
-          position,
-        });
+        await this.sendAttack({ currentPlayer: attackingPlayerName, status, position });
         break;
       }
       case 'killed': {
         this.currentAttackingPlayerName = attackingPlayerName;
-        await sendAttack(this.getClients(), {
-          currentPlayer: attackingPlayerName,
-          status,
-          position,
-        });
-        await this.sendCellsAroundKilled(attackingPlayerName, around);
+        await this.sendAttack({ currentPlayer: attackingPlayerName, status, position, around });
         if (defeat) {
           await this.finish(attackingPlayerName);
           return;
@@ -198,40 +193,23 @@ export class Game extends EventEmitter {
         this.currentAttackingPlayerName = attackedPlayerName;
       }
     }
-    // bot attack
-    if (this.currentAttackingPlayerName === this.bot?.name) {
-      const { bot } = this;
-      const req: RandomAttackRequest = {
-        id: 0,
-        type: 'randomAttack',
-        data: { gameId, indexPlayer: bot.name },
-      };
-      await sendTurn(this.getClients(), this.currentAttackingPlayerName);
-      await sleep(BOT_ATTACK_DELAY);
-      bot.ws.emit('message', stringifyRequest(req));
-
-      return;
-    }
     await sendTurn(this.getClients(), this.currentAttackingPlayerName);
+    await this.botAttack();
   };
 
-  public addShips(data: AddShipsRequest['data']): void {
-    const { indexPlayer, ships: shipsInfo, gameId } = data;
-
-    if (this.id !== gameId || this.fleets.size === Room.PLAYERS_LIMIT) {
+  private botAttack = async (delay: number = BOT_ATTACK_DELAY): Promise<void> => {
+    const { bot, id: gameId } = this;
+    if (this.currentAttackingPlayerName !== bot?.name) {
       return;
     }
-    const playerName = indexPlayer.toString();
-    if (this.id !== gameId || !this.room.has(playerName)) {
-      return;
-    }
-    this.fleets.set(playerName, new Fleet(playerName, shipsInfo));
-    // both fleets where created
-    if (this.fleets.size === Room.PLAYERS_LIMIT) {
-      void sendStartGame(this.getClients(), { currentPlayerIndex: playerName, ships: shipsInfo });
-      void sendTurn(this.getClients(), playerName);
-    }
-  }
+    const req: RandomAttackRequest = {
+      id: 0,
+      type: 'randomAttack',
+      data: { gameId, indexPlayer: bot.name },
+    };
+    await sleep(delay);
+    bot.ws.emit('message', stringifyRequest(req));
+  };
 
   private handleClose = (ws: WebSocket): void => {
     const disconnectedPlayer = this.room.findPlayer(ws);

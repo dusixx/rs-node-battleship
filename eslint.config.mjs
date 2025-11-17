@@ -62,6 +62,8 @@ export default defineConfig({
         caughtErrorsIgnorePattern: '^_[^_].*$|^_$',
       },
     ],
+    '@typescript-eslint/member-ordering': 'error',
+    'class-methods-use-this': 'error',
     '@typescript-eslint/restrict-template-expressions': 'off',
     '@typescript-eslint/no-non-null-assertion': 'off',
     '@typescript-eslint/no-misused-spread': 'off',
