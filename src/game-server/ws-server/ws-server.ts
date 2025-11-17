@@ -1,7 +1,7 @@
 import { config } from 'dotenv';
 import { startWebsocketServer } from '../../common/utils/start-server';
 import { cyan } from '../../common/utils/style';
-import { DEF_WS_PORT } from '../common/data/constants';
+import { DEF_WS_PORT } from '../common/constants';
 import { SessionManager } from '../session-manager/session-manager';
 
 config({ quiet: true });

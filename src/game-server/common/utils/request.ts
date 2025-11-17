@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-base-to-string */
 import type { RawData } from 'ws';
 import { hasOwnKeys, isObject, isStr, JSONParse } from '../../../common/utils';
-import { ErrorMessage } from '../data/constants';
+import { ErrorMessage } from '../constants';
 import type { CommandRequest, CommandRequestWithStrigifiedData, CommandType } from '../types';
 
 export const isLikeCommandRequest = (req: unknown): req is CommandRequestWithStrigifiedData => {
@@ -33,4 +33,8 @@ export const parseCommandRequest = <T extends CommandType>(
     parsed: { ...req, data: parsedData } as CommandRequest<T>,
     stringified,
   };
+};
+
+export const stringifyRequest = <T extends CommandType>(req: CommandRequest<T>): string => {
+  return JSON.stringify({ ...req, data: JSON.stringify(req.data) });
 };

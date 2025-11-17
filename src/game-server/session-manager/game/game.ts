@@ -3,17 +3,17 @@ import { type RawData, type WebSocket } from 'ws';
 import type { AnyFunction } from '../../../common/types';
 import { sleep } from '../../../common/utils';
 import { gray, green } from '../../../common/utils/style';
-import { BOT_ALIAS, BOT_ATTACK_DELAY, GameEvent } from '../../common/data/constants';
+import { BOT_ALIAS, BOT_ATTACK_DELAY, GameEvent } from '../../common/constants';
 import type {
   AddShipsRequest,
   AttackRequest,
   Position,
   RandomAttackRequest,
 } from '../../common/types';
-import { parseCommandRequest } from '../../common/utils/request';
+import { parseCommandRequest, stringifyRequest } from '../../common/utils/request';
 import { sendAttack, sendFinishGame, sendStartGame, sendTurn } from '../../common/utils/response';
 import { Room } from '../room/room';
-import type { Player } from '../session-manager';
+import type { Player } from '../session-manager.utils';
 import { Fleet } from './fleet/fleet';
 
 type PlayerEventName = 'message' | 'close';
@@ -199,16 +199,16 @@ export class Game extends EventEmitter {
       }
     }
     // bot attack
-    if (this.bot && this.currentAttackingPlayerName === this.bot.name) {
+    if (this.currentAttackingPlayerName === this.bot?.name) {
       const { bot } = this;
-      const req = {
+      const req: RandomAttackRequest = {
         id: 0,
         type: 'randomAttack',
-        data: JSON.stringify({ gameId, indexPlayer: bot.name }),
+        data: { gameId, indexPlayer: bot.name },
       };
       await sendTurn(this.getClients(), this.currentAttackingPlayerName);
       await sleep(BOT_ATTACK_DELAY);
-      bot.ws.emit('message', JSON.stringify(req));
+      bot.ws.emit('message', stringifyRequest(req));
 
       return;
     }
