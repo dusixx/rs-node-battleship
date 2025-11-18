@@ -6,7 +6,7 @@ import { gray } from '../../common/utils/style';
 import { BOT_ATTACK_DELAY, DEF_WS_PORT } from '../common/constants';
 import type { AddShipsRequest, Credentials, RandomAttackRequest, ShipInfo } from '../common/types';
 import { stringifyRequest } from '../common/utils/request';
-import { fleets } from '../data/fleets.data';
+import { fleets } from '../data/fleets';
 
 config({ quiet: true });
 

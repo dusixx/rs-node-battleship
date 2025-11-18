@@ -1,4 +1,4 @@
 dist
 node_modules
 front
-**.data.ts
+**/data/**
