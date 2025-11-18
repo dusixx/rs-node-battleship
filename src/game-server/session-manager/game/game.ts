@@ -1,11 +1,10 @@
 import EventEmitter from 'node:events';
 import { type RawData, type WebSocket } from 'ws';
 import type { AnyFunction } from '../../../common/types';
-import { sleep } from '../../../common/utils';
 import { gray, green } from '../../../common/utils/style';
-import { BOT_ALIAS, BOT_ATTACK_DELAY, GameEvent } from '../../common/constants';
+import { BOT_ALIAS, GameEvent } from '../../common/constants';
 import type { AddShipsRequest, AttackRequest, RandomAttackRequest } from '../../common/types';
-import { parseCommandRequest, stringifyRequest } from '../../common/utils/request';
+import { parseCommandRequest } from '../../common/utils/request';
 import {
   sendAttack as _sendAttack,
   sendFinishGame,
@@ -13,7 +12,7 @@ import {
   sendTurn,
 } from '../../common/utils/response';
 import { Room } from '../room/room';
-import type { Player } from '../session-manager.utils';
+import type { Bot, Player } from '../session-manager.utils';
 import { Fleet } from './fleet/fleet';
 
 type PlayerEventName = 'message' | 'close';
@@ -28,7 +27,7 @@ export class Game extends EventEmitter {
   private fleets = new Map<string, Fleet>();
   private currentAttackingPlayerName: string = '';
   private playerListeners = new Map<WebSocket, Record<PlayerEventName, AnyFunction>>();
-  private bot: Player | undefined;
+  private bot: Bot | undefined;
 
   constructor(room: Room) {
     super();
@@ -37,7 +36,7 @@ export class Game extends EventEmitter {
     if (room.players.length !== Room.PLAYERS_LIMIT) {
       throw Error(`${Room.PLAYERS_LIMIT} players needed`);
     }
-    this.bot = room.players.find(p => p.isBot);
+    this.bot = room.players.find(p => p.isBot) as Bot;
     this.addListeners();
   }
 
@@ -183,21 +182,10 @@ export class Game extends EventEmitter {
       }
     }
     await sendTurn(this.getClients(), this.currentAttackingPlayerName);
-    await this.botAttack();
-  };
 
-  private botAttack = async (delay: number = BOT_ATTACK_DELAY): Promise<void> => {
-    const { bot, id: gameId } = this;
-    if (this.currentAttackingPlayerName !== bot?.name) {
-      return;
+    if (this.currentAttackingPlayerName === this.bot?.name) {
+      await this.bot.randomAttack();
     }
-    const req: RandomAttackRequest = {
-      id: 0,
-      type: 'randomAttack',
-      data: { gameId, indexPlayer: bot.name },
-    };
-    await sleep(delay);
-    bot.ws.emit('message', stringifyRequest(req));
   };
 
   private handleClose = (ws: WebSocket): void => {

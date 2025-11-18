@@ -15,7 +15,7 @@ import {
 import type { GameFinishEventResult } from './game/game';
 import { Game } from './game/game';
 import { Room } from './room/room';
-import { addBotShips, createBot, type Player } from './session-manager.utils';
+import { createBot, type Player } from './session-manager.utils';
 
 export class SessionManager {
   private static instance: SessionManager | null = null;
@@ -120,7 +120,7 @@ export class SessionManager {
       return;
     }
     await this.handleAddUserToRoom(ws, room.id);
-    addBotShips(bot);
+    bot.addShips();
   };
 
   private handleCreateRoom = async (ws: WebSocket): Promise<string | undefined> => {

@@ -1,10 +1,10 @@
 import { config } from 'dotenv';
 import type { WebSocketServer } from 'ws';
 import { WebSocket } from 'ws';
-import { getId, hasOwnKeys, rndInt } from '../../common/utils';
+import { getId, hasOwnKeys, rndInt, sleep } from '../../common/utils';
 import { gray } from '../../common/utils/style';
-import { DEF_WS_PORT } from '../common/constants';
-import type { AddShipsRequest, Credentials, ShipInfo } from '../common/types';
+import { BOT_ATTACK_DELAY, DEF_WS_PORT } from '../common/constants';
+import type { AddShipsRequest, Credentials, RandomAttackRequest, ShipInfo } from '../common/types';
 import { stringifyRequest } from '../common/utils/request';
 import { fleets } from '../data/fleets.data';
 
@@ -13,36 +13,57 @@ config({ quiet: true });
 const { WS_PORT } = process.env;
 
 export type Player = Credentials & {
+  isBot?: boolean;
   wins: number;
   online: boolean;
   ws: WebSocket;
-  isBot?: boolean;
 };
 
-export const createBot = (wss: WebSocketServer): Player => {
+export type Bot = Player & {
+  isBot: true;
+  addShips: () => void;
+  randomAttack: (delay?: number) => Promise<void>;
+};
+
+export const createBot = (wss: WebSocketServer): Bot => {
   const address = wss.address();
   const port = hasOwnKeys(address, 'port')
     ? address.port
     : address || Number(WS_PORT) || DEF_WS_PORT;
+
   const ws = new WebSocket(`ws://localhost:${port}`);
+  const name = `bot-${getId()}`;
+
+  const addShips = (): void => {
+    const idx = rndInt(0, fleets.length - 1);
+    const ships = (fleets as ShipInfo[][])[idx]!;
+    const req: AddShipsRequest = {
+      id: 0,
+      type: 'add_ships',
+      data: { gameId: name, indexPlayer: name, ships },
+    };
+    console.log(gray(`[debug]: fleet (${idx})`));
+    ws.emit('message', stringifyRequest(req));
+  };
+
+  const randomAttack = async (delay: number = BOT_ATTACK_DELAY): Promise<void> => {
+    const req: RandomAttackRequest = {
+      id: 0,
+      type: 'randomAttack',
+      data: { gameId: name, indexPlayer: name },
+    };
+    await sleep(delay);
+    ws.emit('message', stringifyRequest(req));
+  };
+
   return {
-    name: `bot-${getId()}`,
+    addShips,
+    randomAttack,
+    name,
     password: '',
+    wins: 0,
     online: true,
     isBot: true,
-    wins: 0,
     ws,
   };
-};
-
-export const addBotShips = (bot: Player): void => {
-  const idx = rndInt(0, fleets.length - 1);
-  const ships = (fleets as ShipInfo[][])[idx]!;
-  const req: AddShipsRequest = {
-    id: 0,
-    type: 'add_ships',
-    data: { gameId: bot.name, indexPlayer: bot.name, ships },
-  };
-  console.log(gray(`[debug]: fleet (${idx})`));
-  bot.ws.emit('message', stringifyRequest(req));
 };
