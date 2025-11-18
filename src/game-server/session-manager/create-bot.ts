@@ -3,21 +3,15 @@ import type { WebSocketServer } from 'ws';
 import { WebSocket } from 'ws';
 import { getId, hasOwnKeys, rndInt, sleep } from '../../common/utils';
 import { gray } from '../../common/utils/style';
-import { BOT_ATTACK_DELAY, DEF_WS_PORT } from '../common/constants';
-import type { AddShipsRequest, Credentials, RandomAttackRequest, ShipInfo } from '../common/types';
+import { BOT_ATTACK_DELAY, DEF_HOSTNAME, DEF_WS_PORT } from '../common/constants';
+import type { AddShipsRequest, RandomAttackRequest, ShipInfo } from '../common/types';
 import { stringifyRequest } from '../common/utils/request';
 import { fleets } from '../data/fleets';
+import type { Player } from './session-manager';
 
 config({ quiet: true });
 
 const { WS_PORT } = process.env;
-
-export type Player = Credentials & {
-  isBot?: boolean;
-  wins: number;
-  online: boolean;
-  ws: WebSocket;
-};
 
 export type Bot = Player & {
   isBot: true;
@@ -31,7 +25,7 @@ export const createBot = (wss: WebSocketServer): Bot => {
     ? address.port
     : address || Number(WS_PORT) || DEF_WS_PORT;
 
-  const ws = new WebSocket(`ws://localhost:${port}`);
+  const ws = new WebSocket(`ws://${DEF_HOSTNAME}:${port}`);
   const name = `bot-${getId()}`;
 
   const addShips = (): void => {
@@ -55,7 +49,6 @@ export const createBot = (wss: WebSocketServer): Bot => {
     await sleep(delay);
     ws.emit('message', stringifyRequest(req));
   };
-
   return {
     addShips,
     randomAttack,

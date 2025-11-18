@@ -11,8 +11,9 @@ import {
   sendStartGame,
   sendTurn,
 } from '../../common/utils/response';
+import type { Bot } from '../create-bot.ts';
 import { Room } from '../room/room';
-import type { Bot, Player } from '../session-manager.utils';
+import type { Player } from '../session-manager';
 import { Fleet } from './fleet/fleet';
 
 type PlayerEventName = 'message' | 'close';
@@ -44,8 +45,8 @@ export class Game extends EventEmitter {
     return this.room.id;
   }
 
-  public get room(): Readonly<Room> {
-    return Object.freeze(this._room);
+  public get room(): Room {
+    return this._room;
   }
 
   public has: typeof this.room.has = (...args) => {
@@ -171,8 +172,8 @@ export class Game extends EventEmitter {
         this.currentAttackingPlayerName = attackingPlayerName;
         await this.sendAttack({ currentPlayer: attackingPlayerName, status, position, around });
         if (defeat) {
-          const winner = this.room.findPlayer(attackingPlayerName);
-          await this.finish(winner!);
+          const winner = this.room.findPlayer(attackingPlayerName)!;
+          await this.finish(winner);
           return;
         }
         break;

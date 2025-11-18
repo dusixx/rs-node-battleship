@@ -12,10 +12,17 @@ import {
   sendUpdateRoom,
   sendUpdateWinners,
 } from '../common/utils/response';
+import { createBot } from './create-bot';
 import type { GameFinishEventResult } from './game/game';
 import { Game } from './game/game';
 import { Room } from './room/room';
-import { createBot, type Player } from './session-manager.utils';
+
+export type Player = Credentials & {
+  isBot?: boolean;
+  wins: number;
+  online: boolean;
+  ws: WebSocket;
+};
 
 export class SessionManager {
   private static instance: SessionManager | null = null;
@@ -211,7 +218,7 @@ export class SessionManager {
 
   private signup = async (ws: WebSocket, { name, password }: Credentials): Promise<void> => {
     if (!/^[a-z][a-z0-9]+$/i.test(name)) {
-      await sendLoginError(ws, ErrorMessage.LoginAllowed);
+      await sendLoginError(ws, ErrorMessage.InvalidLogin);
       return;
     }
     const player = { name, password, online: true, wins: 0, ws };

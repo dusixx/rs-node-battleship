@@ -4,6 +4,7 @@ import { exec } from 'node:child_process';
 import http from 'node:http';
 import { promisify } from 'node:util';
 import { WebSocketServer } from 'ws';
+import { DEF_HOSTNAME } from '../../game-server/common/constants';
 
 const execAsync = promisify(exec);
 
@@ -47,7 +48,7 @@ const MSG_ADDRR_IN_USE = '⏳ Address in use, retrying...';
 const DefaultOptions = {
   connectionTimeout: 10_000,
   retryDelay: 1000,
-  hostname: 'localhost',
+  hostname: DEF_HOSTNAME,
   killExists: true,
 } as const;
 
