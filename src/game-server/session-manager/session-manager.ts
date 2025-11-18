@@ -70,15 +70,12 @@ export class SessionManager {
   };
 
   private initGame = (game: Game): void => {
-    game.on(GameEvent.Finish, ({ game, winner, bot }: GameFinishEventResult) => {
-      winner.wins += 1;
+    game.on(GameEvent.Finish, ({ game, winner }: GameFinishEventResult) => {
+      if (winner) {
+        winner.wins += 1;
+      }
       this.games.delete(game.id);
       this.rooms.delete(game.id);
-      // remove bot
-      if (bot) {
-        this.clients.delete(bot.ws);
-        this.players.delete(bot.name);
-      }
       void sendUpdateWinners(this.clients.keys(), this.getWinners());
     });
   };
@@ -113,6 +110,7 @@ export class SessionManager {
   };
 
   private handleSinglePlay = async (ws: WebSocket): Promise<void> => {
+    // do not add bot to players
     const bot = createBot(this.wss);
     const room = new Room(bot);
     this.rooms.set(bot.name, room);
@@ -185,6 +183,17 @@ export class SessionManager {
     await sendUpdateRoom(this.clients.keys(), this.getAvailableRooms());
   };
 
+  private addPlayer = (player: Player): void => {
+    this.players.set(player.name, player);
+    this.clients.set(player.ws, player);
+  };
+
+  private sendLogin = async (ws: WebSocket, name: string): Promise<void> => {
+    await sendLoginSuccess(ws, name);
+    await sendUpdateRoom(this.clients.keys(), this.getAvailableRooms());
+    await sendUpdateWinners(this.clients.keys(), this.getWinners());
+  };
+
   private signin = async (ws: WebSocket, existsPlayer: Player, password: string): Promise<void> => {
     if (existsPlayer.online) {
       await sendLoginError(ws, ErrorMessage.PlayerAlreadyOnline);
@@ -197,11 +206,7 @@ export class SessionManager {
     existsPlayer.ws = ws;
     existsPlayer.online = true;
     this.clients.set(ws, existsPlayer);
-  };
-
-  private addPlayer = (player: Player): void => {
-    this.players.set(player.name, player);
-    this.clients.set(player.ws, player);
+    await this.sendLogin(ws, existsPlayer.name);
   };
 
   private signup = async (ws: WebSocket, { name, password }: Credentials): Promise<void> => {
@@ -211,19 +216,16 @@ export class SessionManager {
     }
     const player = { name, password, online: true, wins: 0, ws };
     this.addPlayer(player);
+    await this.sendLogin(ws, name);
   };
 
   private handleLogin = async (ws: WebSocket, { name, password }: Credentials): Promise<void> => {
     const existsPlayer = this.players.get(name);
-
     if (existsPlayer) {
       await this.signin(ws, existsPlayer, password);
     } else {
       await this.signup(ws, { name, password });
     }
-    await sendLoginSuccess(ws, name);
-    await sendUpdateRoom(this.clients.keys(), this.getAvailableRooms());
-    await sendUpdateWinners(this.clients.keys(), this.getWinners());
   };
 
   private handleConnectionClose = (ws: WebSocket): void => {
