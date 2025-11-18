@@ -19,9 +19,8 @@ import { Fleet } from './fleet/fleet';
 type PlayerEventName = 'message' | 'close';
 
 export type GameFinishEventResult = {
-  winner: Player;
+  winner?: Player;
   game: Game;
-  bot?: Player;
 };
 
 export class Game extends EventEmitter {
@@ -54,30 +53,19 @@ export class Game extends EventEmitter {
     return this.room.has(...args);
   };
 
-  public async finish(winner: Player | string): Promise<void> {
+  public async finish(player: Player): Promise<void> {
     this.removeListeners();
+
+    const winner = player.isBot ? undefined : player;
+    const name = winner?.name ?? BOT_ALIAS;
 
     if (this.bot) {
       this.bot.ws.close();
     }
-    const player = this.room.findPlayer(winner);
-    if (!player) {
-      return;
-    }
-    console.log(
-      green(`[game]:`),
-      gray(`(${this.id})`),
-      player.isBot ? BOT_ALIAS : player.name,
-      'won',
-    );
-
-    await sendFinishGame(this.getClients(), player.name);
+    console.log(green(`[game]:`), gray(`(${this.id})`), name, 'won');
+    await sendFinishGame(this.getClients(), name);
     // TODO: need to type
-    this.emit(GameEvent.Finish, {
-      winner: player,
-      game: this,
-      bot: this.bot,
-    });
+    this.emit(GameEvent.Finish, { winner, game: this });
   }
 
   public addShips(data: AddShipsRequest['data']): void {
@@ -184,7 +172,8 @@ export class Game extends EventEmitter {
         this.currentAttackingPlayerName = attackingPlayerName;
         await this.sendAttack({ currentPlayer: attackingPlayerName, status, position, around });
         if (defeat) {
-          await this.finish(attackingPlayerName);
+          const winner = this.room.findPlayer(attackingPlayerName);
+          await this.finish(winner!);
           return;
         }
         break;
