@@ -3,17 +3,16 @@ import { isStr } from '../../../common/utils/index';
 import type { RoomUsers } from '../../common/types';
 import type { Player } from '../session-manager';
 
+type PlayerItem = string | WebSocket | Player;
+
 export class Room {
   public static PLAYERS_LIMIT = 2;
   private _players: Player[] = [];
+  private _id: string;
 
-  constructor(
-    private _id: string,
-    player?: Player,
-  ) {
-    if (player) {
-      this.add(player);
-    }
+  constructor(owner: Player) {
+    this.add(owner);
+    this._id = owner.name;
   }
 
   public get players(): Player[] {
@@ -29,12 +28,12 @@ export class Room {
   }
 
   public add(player: Player): void {
-    if (this._players.length < Room.PLAYERS_LIMIT) {
+    if (this._players.length < Room.PLAYERS_LIMIT && !this.has(player)) {
       this._players.push(player);
     }
   }
 
-  public findPlayer(obj: string | WebSocket | Player): Player | undefined {
+  public findPlayer(obj: PlayerItem): Player | undefined {
     return this.players.find(p => {
       if (isStr(obj) && p.name === obj) {
         return true;
@@ -46,16 +45,14 @@ export class Room {
     });
   }
 
-  public has(player?: Player | string): boolean {
-    return Boolean(
-      this._players.find(p => {
-        const name = isStr(player) ? player : player?.name;
-        return p.name === name;
-      }),
-    );
+  public has(obj?: PlayerItem): boolean {
+    return Boolean(obj && this.findPlayer(obj));
   }
 
-  public remove(player: Player): void {
-    this._players = this._players.filter(p => p.name !== player.name);
+  public remove(obj: PlayerItem): void {
+    const player = this.findPlayer(obj);
+    if (player) {
+      this._players = this._players.filter(p => p.name !== player.name);
+    }
   }
 }

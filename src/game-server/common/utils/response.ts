@@ -1,12 +1,12 @@
-import type WebSocket from 'ws';
+import WebSocket from 'ws';
 import type { WithOptional } from '../../../common/types';
-import { isIterable } from '../../../common/utils';
 import { cyan, gray, yellow } from '../../../common/utils/style';
 import type {
   AttackResponse,
   CommandResponse,
   CommandType,
   CreateGameResponse,
+  Position,
   StartGameResponse,
   UpdateRoomResponse,
   UpdateWinnersResponse,
@@ -35,7 +35,7 @@ export const sendCommandResponse = async <T extends CommandType>(
   };
   const stringified = JSON.stringify(body);
 
-  if (!isIterable(webSocket)) {
+  if (webSocket instanceof WebSocket) {
     webSocket = [webSocket];
   }
   for (const ws of webSocket) {
@@ -136,7 +136,7 @@ export const sendTurn = async (
   });
 };
 
-export const sendAttack = async (
+const _sendAttack = async (
   ws: Iterable<WebSocket> | WebSocket,
   data: AttackResponse['data'],
 ): Promise<void> => {
@@ -144,4 +144,25 @@ export const sendAttack = async (
     type: 'attack',
     data,
   });
+};
+
+export const sendAttack = async (
+  ws: Iterable<WebSocket>,
+  data: AttackResponse['data'] & { around?: Position[] },
+): Promise<void> => {
+  const { currentPlayer, status, position, around = [] } = data;
+  await _sendAttack(ws, {
+    currentPlayer,
+    status,
+    position,
+  });
+  if (status === 'killed') {
+    for (const position of around) {
+      await _sendAttack(ws, {
+        currentPlayer,
+        status: 'miss',
+        position,
+      });
+    }
+  }
 };

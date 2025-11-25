@@ -4,7 +4,7 @@ import * as path from 'path';
 import { showError } from '../common/utils/index';
 import { startHttpServer } from '../common/utils/start-server';
 import { cyan } from '../common/utils/style';
-import { DEF_HTTP_PORT } from './../game-server/common/data/constants';
+import { DEF_HTTP_PORT } from '../game-server/common/constants';
 
 config({ quiet: true });
 

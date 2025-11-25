@@ -84,7 +84,7 @@ export class Fleet {
   }
 
   private init(infos: ShipInfo[]): void {
-    this.parseShipsInfos(infos);
+    this.parseShipInfos(infos);
     this.initAvailableCells();
   }
 
@@ -102,7 +102,7 @@ export class Fleet {
     }
   };
 
-  private parseShipsInfos(infos: ShipInfo[]): void {
+  private parseShipInfos(infos: ShipInfo[]): void {
     for (const info of infos) {
       const boat: Boat = {
         body: new Set<XYPair>(),
