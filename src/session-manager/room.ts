@@ -1,7 +1,7 @@
 import { WebSocket } from 'ws';
-import { isStr } from '../../../common/utils/index';
-import type { RoomUsers } from '../../common/types';
-import type { Player } from '../session-manager';
+import type { RoomUsers } from '../common/types/game';
+import { isStr } from '../common/utils';
+import type { Player } from './session-manager';
 
 type PlayerItem = string | WebSocket | Player;
 

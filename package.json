@@ -4,10 +4,8 @@
   "description": "Websocket battleship server",
   "main": "index.js",
   "scripts": {
-    "start:http": "nodemon --watch src --ext ts --exec ts-node src/http-server/index.ts",
-    "start:ws": "nodemon --watch src --ext ts --exec ts-node src/game-server/ws-server/ws-server.ts",
     "dev": "nodemon --watch src --ext ts --exec ts-node src/index.ts",
-    "start": "npm run build && node dist/index.js",
+    "start": "rimraf dist && npm run build && node dist/index.js",
     "build": "tsc",
     "test": "echo not implemented",
     "coverage": "echo not implemented",
@@ -59,6 +57,7 @@
   },
   "dependencies": {
     "dotenv": "^17.2.3",
+    "rimraf": "^6.1.2",
     "ws": "^8.8.0"
   }
 }

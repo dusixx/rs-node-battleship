@@ -1,5 +1,5 @@
 /* eslint-disable prefer-const */
-import type { Position, ShipInfo } from '../../../common/types';
+import type { Position, ShipInfo } from '../../common/types/game';
 
 export const FIELD_SIZE = 10;
 

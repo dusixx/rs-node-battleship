@@ -1,12 +1,26 @@
-/* eslint-disable @typescript-eslint/no-misused-promises */
-import type { RequestListener, Server } from 'http';
+import * as net from 'net';
 import { exec } from 'node:child_process';
+import type { RequestListener } from 'node:http';
 import http from 'node:http';
 import { promisify } from 'node:util';
 import { WebSocketServer } from 'ws';
-import { DEF_HOSTNAME } from '../../game-server/common/constants';
+import { sleep } from '.';
 
 const execAsync = promisify(exec);
+
+async function isPortAvailable(port: number | string): Promise<boolean> {
+  return new Promise(resolve => {
+    const server = net.createServer();
+    server.once('error', () => {
+      resolve(false);
+    });
+    server.once('listening', () => {
+      server.close();
+      resolve(true);
+    });
+    server.listen(port);
+  });
+}
 
 const tryKillTask = async (pid: string | number): Promise<void> => {
   try {
@@ -16,7 +30,7 @@ const tryKillTask = async (pid: string | number): Promise<void> => {
   }
 };
 
-export const killServer = async (port: number): Promise<void> => {
+const tryKillServer = async (port: number | string): Promise<void> => {
   try {
     if (process.platform === 'win32') {
       const { stdout } = await execAsync(`netstat -ano | findstr :${port}`);
@@ -34,95 +48,51 @@ export const killServer = async (port: number): Promise<void> => {
   }
 };
 
-type StartServerProps = {
-  port: number;
-  hostname?: string;
-  killExists?: boolean;
-  connectionTimeout?: number;
-  retryDelay?: number;
+type TryFreePortProps = {
+  port: number | string;
+  attempts?: number;
+  delay?: number;
+  quiet?: boolean;
 };
 
-const ERR_TIME_IS_UP = 'time is up';
-const MSG_ADDRR_IN_USE = '⏳ Address in use, retrying...';
+class TimeoutError extends Error {}
 
-const DefaultOptions = {
-  connectionTimeout: 10_000,
-  retryDelay: 1000,
-  hostname: DEF_HOSTNAME,
-  killExists: true,
-} as const;
+const tryFreePort = async ({
+  port,
+  attempts = 5,
+  delay = 1500,
+  quiet,
+}: TryFreePortProps): Promise<void> => {
+  let curAttempt = 0;
 
-export const startWebsocketServer = async (props: StartServerProps): Promise<WebSocketServer> => {
-  const { port, connectionTimeout, retryDelay, killExists, hostname } = {
-    ...DefaultOptions,
-    ...props,
-  };
-  let elapsed = 0;
-  const wss = new WebSocketServer({ port, host: hostname });
+  while (!(await isPortAvailable(port))) {
+    if (!quiet) {
+      console.log(`Address in use, retrying (${curAttempt + 1}/${attempts})...`);
+    }
+    await tryKillServer(port);
+    await sleep(delay);
+
+    if ((curAttempt += 1) >= attempts) {
+      throw new TimeoutError('time is up');
+    }
+  }
+};
+
+export const startServers = async (
+  port: number,
+  requestListener?: RequestListener,
+): Promise<WebSocketServer> => {
+  await tryFreePort({ port });
+
+  const server = http.createServer(requestListener);
+  const wss = new WebSocketServer({ server });
 
   return await new Promise((resolve, reject) => {
-    wss.on('listening', () => {
+    server.on('error', reject);
+    server.on('listening', () => {
       resolve(wss);
     });
-    if (killExists) {
-      wss.on('error', async (err: NodeJS.ErrnoException) => {
-        if (err.code === 'EADDRINUSE') {
-          console.log(MSG_ADDRR_IN_USE);
-          await killServer(port);
-
-          setTimeout(async () => {
-            wss.close();
-
-            elapsed += retryDelay;
-            if (elapsed >= connectionTimeout) {
-              reject(Error(ERR_TIME_IS_UP));
-            }
-            resolve(await startWebsocketServer(props));
-          }, retryDelay);
-        }
-      });
-    } else {
-      wss.on('error', reject);
-    }
-  });
-};
-
-export const startHttpServer = async (
-  props: StartServerProps,
-  requestListener?: RequestListener,
-): Promise<Server> => {
-  const { port, connectionTimeout, retryDelay, killExists, hostname } = {
-    ...DefaultOptions,
-    ...props,
-  };
-  let elapsed = 0;
-  const server = http.createServer(requestListener);
-
-  return await new Promise((resolve, reject) => {
-    if (killExists) {
-      server.on('error', async (err: NodeJS.ErrnoException) => {
-        if (err.code === 'EADDRINUSE') {
-          console.log(MSG_ADDRR_IN_USE);
-
-          await killServer(port);
-
-          setTimeout(() => {
-            server.close();
-
-            elapsed += retryDelay;
-            if (elapsed >= connectionTimeout) {
-              reject(Error(ERR_TIME_IS_UP));
-            }
-            server.listen(port, hostname);
-          }, retryDelay);
-        }
-      });
-    } else {
-      server.on('error', reject);
-    }
-    server.on('listening', () => {
-      resolve(server);
-    });
-    server.listen(port, hostname);
+    wss.on('error', reject);
+    server.listen(port);
   });
 };

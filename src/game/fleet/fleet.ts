@@ -1,5 +1,5 @@
-import { rndInt } from '../../../../common/utils';
-import type { AttackResponse, Position, ShipInfo } from '../../../common/types';
+import type { AttackResponse, Position, ShipInfo } from '../../common/types/game';
+import { rndInt } from '../../common/utils';
 import { FIELD_SIZE, getCells } from './fleet.utils';
 
 type XYPair = `${number},${number}`;

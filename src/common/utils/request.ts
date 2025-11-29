@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-base-to-string */
 import type { RawData } from 'ws';
-import { hasOwnKeys, isObject, isStr, JSONParse } from '../../../common/utils';
+import { hasOwnKeys, isObject, isStr, JSONParse } from '.';
 import { ErrorMessage } from '../constants';
-import type { CommandRequest, CommandRequestWithStrigifiedData, CommandType } from '../types';
+import type { CommandRequest, CommandRequestWithStrigifiedData, CommandType } from '../types/game';
 
 export const isLikeCommandRequest = (req: unknown): req is CommandRequestWithStrigifiedData => {
   return hasOwnKeys<CommandRequestWithStrigifiedData>(req, 'type', 'data', 'id') && isStr(req.data);

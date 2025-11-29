@@ -1,17 +1,17 @@
 import { config } from 'dotenv';
 import type { WebSocketServer } from 'ws';
 import { WebSocket } from 'ws';
-import { getId, hasOwnKeys, rndInt, sleep } from '../../common/utils';
-import { gray } from '../../common/utils/style';
-import { BOT_ATTACK_DELAY, DEF_HOSTNAME, DEF_WS_PORT } from '../common/constants';
-import type { AddShipsRequest, RandomAttackRequest, ShipInfo } from '../common/types';
+import { BOT_ATTACK_DELAY, DEF_HOSTNAME, DEF_PORT } from '../common/constants';
+import { fleets } from '../common/data/fleets';
+import type { AddShipsRequest, RandomAttackRequest, ShipInfo } from '../common/types/game';
+import { getId, hasOwnKeys, rndInt, sleep } from '../common/utils';
 import { stringifyRequest } from '../common/utils/request';
-import { fleets } from '../data/fleets';
+import { gray } from '../common/utils/style';
 import type { Player } from './session-manager';
 
 config({ quiet: true });
 
-const { WS_PORT } = process.env;
+const { PORT } = process.env;
 
 export type Bot = Player & {
   isBot: true;
@@ -21,9 +21,7 @@ export type Bot = Player & {
 
 export const createBot = (wss: WebSocketServer): Bot => {
   const address = wss.address();
-  const port = hasOwnKeys(address, 'port')
-    ? address.port
-    : address || Number(WS_PORT) || DEF_WS_PORT;
+  const port = hasOwnKeys(address, 'port') ? address.port : address || Number(PORT) || DEF_PORT;
 
   const ws = new WebSocket(`ws://${DEF_HOSTNAME}:${port}`);
   const name = `bot-${getId()}`;
