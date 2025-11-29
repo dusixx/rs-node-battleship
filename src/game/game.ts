@@ -7,16 +7,17 @@ import type {
   AttackRequest,
   RandomAttackRequest,
 } from '../common/types/index';
-import { parseCommandRequest } from '../common/utils/request';
 import {
   sendAttack as _sendAttack,
+  gray,
+  green,
+  parseCommandRequest,
   sendFinishGame,
   sendStartGame,
   sendTurn,
-} from '../common/utils/response';
-import { gray, green } from '../common/utils/style';
-import type { Bot } from '../session-manager/create-bot';
-import { Room } from '../session-manager/room';
+} from '../common/utils';
+import type { Bot } from '../session-manager/components/create-bot';
+import { Room } from '../session-manager/components/room';
 import type { Player } from '../session-manager/session-manager';
 import { Fleet } from './fleet/fleet';
 type PlayerEventName = 'message' | 'close';

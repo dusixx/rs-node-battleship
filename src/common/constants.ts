@@ -1,7 +1,7 @@
 export const BOT_ALIAS = '#bot';
 export const BOT_ATTACK_DELAY = 250;
 export const DEF_PORT = 3000;
-export const DEF_HOSTNAME = 'localhost';
+export const DEF_HOSTNAME = '[::1]';
 
 export const ErrorMessage = {
   InvalidCommandRequest: 'invalid command request format',

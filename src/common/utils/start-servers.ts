@@ -4,7 +4,7 @@ import type { RequestListener } from 'node:http';
 import http from 'node:http';
 import { promisify } from 'node:util';
 import { WebSocketServer } from 'ws';
-import { sleep } from '.';
+import { sleep } from './misc';
 
 const execAsync = promisify(exec);
 

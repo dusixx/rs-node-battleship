@@ -3,9 +3,7 @@ import fs from 'fs';
 import type { IncomingMessage, ServerResponse } from 'http';
 import path from 'path';
 import { DEF_PORT } from './common/constants';
-import { showError } from './common/utils';
-import { startServers } from './common/utils/start-server';
-import { cyan } from './common/utils/style';
+import { cyan, showError, startServers } from './common/utils';
 import { SessionManager } from './session-manager/session-manager';
 
 config({ quiet: true });

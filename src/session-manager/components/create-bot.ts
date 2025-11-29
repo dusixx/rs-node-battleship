@@ -1,13 +1,11 @@
 import { config } from 'dotenv';
 import type { WebSocketServer } from 'ws';
 import { WebSocket } from 'ws';
-import { BOT_ATTACK_DELAY, DEF_HOSTNAME, DEF_PORT } from '../common/constants';
-import { fleets } from '../common/data/fleets';
-import type { AddShipsRequest, RandomAttackRequest, ShipInfo } from '../common/types/game';
-import { getId, hasOwnKeys, rndInt, sleep } from '../common/utils';
-import { stringifyRequest } from '../common/utils/request';
-import { gray } from '../common/utils/style';
-import type { Player } from './session-manager';
+import { BOT_ATTACK_DELAY, DEF_HOSTNAME, DEF_PORT } from '../../common/constants';
+import { fleets } from '../../common/data/fleets';
+import type { AddShipsRequest, RandomAttackRequest, ShipInfo } from '../../common/types';
+import { getId, gray, hasOwnKeys, rndInt, sleep, stringifyRequest } from '../../common/utils';
+import type { Player } from '../session-manager';
 
 config({ quiet: true });
 
@@ -47,6 +45,7 @@ export const createBot = (wss: WebSocketServer): Bot => {
     await sleep(delay);
     ws.emit('message', stringifyRequest(req));
   };
+
   return {
     addShips,
     randomAttack,
