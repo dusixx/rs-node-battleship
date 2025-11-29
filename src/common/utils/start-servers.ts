@@ -22,7 +22,7 @@ async function isPortAvailable(port: number | string): Promise<boolean> {
   });
 }
 
-const tryKillTask = async (pid: string | number): Promise<void> => {
+const tryKillWin32Task = async (pid: string | number): Promise<void> => {
   try {
     await execAsync(`taskkill /f /pid ${pid}`);
   } catch {
@@ -38,7 +38,7 @@ const tryKillServer = async (port: number | string): Promise<void> => {
       const pids = [...new Set(matches)].map(Number).filter(Boolean);
 
       for (const pid of pids) {
-        await tryKillTask(pid);
+        await tryKillWin32Task(pid);
       }
     } else {
       await execAsync(`lsof -ti:${port} | xargs kill -9`);
