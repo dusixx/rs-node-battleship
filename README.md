@@ -9,6 +9,9 @@ npm i
 ```
 
 ```sh
+# create .env file from .env.example
+cp .env.example .env
+
 # run in production mode (both `WebSocket` and `Http` servers)
 npm start
 
