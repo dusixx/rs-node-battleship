@@ -88,11 +88,11 @@ export const startServers = async (
   const wss = new WebSocketServer({ server });
 
   return await new Promise((resolve, reject) => {
-    server.on('error', reject);
-    server.on('listening', () => {
+    server.once('error', reject);
+    server.once('listening', () => {
       resolve(wss);
     });
-    wss.on('error', reject);
+    wss.once('error', reject);
     server.listen(port);
   });
 };
