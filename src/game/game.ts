@@ -1,21 +1,24 @@
 import EventEmitter from 'node:events';
 import { type RawData, type WebSocket } from 'ws';
-import type { AnyFunction } from '../../../common/types';
-import { gray, green } from '../../../common/utils/style';
-import { BOT_ALIAS, GameEvent } from '../../common/constants';
-import type { AddShipsRequest, AttackRequest, RandomAttackRequest } from '../../common/types';
-import { parseCommandRequest } from '../../common/utils/request';
+import { BOT_ALIAS, GameEvent } from '../common/constants';
+import type {
+  AddShipsRequest,
+  AnyFunction,
+  AttackRequest,
+  RandomAttackRequest,
+} from '../common/types/index';
+import { parseCommandRequest } from '../common/utils/request';
 import {
   sendAttack as _sendAttack,
   sendFinishGame,
   sendStartGame,
   sendTurn,
-} from '../../common/utils/response';
-import type { Bot } from '../create-bot.ts';
-import { Room } from '../room/room';
-import type { Player } from '../session-manager';
+} from '../common/utils/response';
+import { gray, green } from '../common/utils/style';
+import type { Bot } from '../session-manager/create-bot';
+import { Room } from '../session-manager/room';
+import type { Player } from '../session-manager/session-manager';
 import { Fleet } from './fleet/fleet';
-
 type PlayerEventName = 'message' | 'close';
 
 export type GameFinishEventResult = {

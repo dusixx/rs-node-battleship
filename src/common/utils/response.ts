@@ -1,6 +1,4 @@
 import WebSocket from 'ws';
-import type { WithOptional } from '../../../common/types';
-import { cyan, gray, yellow } from '../../../common/utils/style';
 import type {
   AttackResponse,
   CommandResponse,
@@ -10,7 +8,9 @@ import type {
   StartGameResponse,
   UpdateRoomResponse,
   UpdateWinnersResponse,
-} from '../types';
+  WithOptional,
+} from '../types/index';
+import { cyan, gray, yellow } from './style';
 
 export const send = async (ws: WebSocket, data: string): Promise<void> => {
   await new Promise<void>((resolve, reject) => {
