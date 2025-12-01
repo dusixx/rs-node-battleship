@@ -1,5 +1,6 @@
 import type { WebSocket } from 'ws';
 import { type RawData, type WebSocketServer } from 'ws';
+import { Bot } from '../bot/bot';
 import { BOT_ALIAS, ErrorMessage, GameEvent } from '../common/constants';
 import type { Credentials, UpdateRoomResponse, UpdateWinnersResponse } from '../common/types/game';
 import { cyan, gray, magenta, parseCommandRequest, showError, yellow } from '../common/utils';
@@ -12,8 +13,7 @@ import {
 } from '../common/utils/response';
 import type { GameFinishEventResult } from '../game/game';
 import { Game } from '../game/game';
-import { Bot } from './components/bot';
-import { Room } from './components/room';
+import { Room } from '../room/room';
 
 export type Player = Credentials & {
   isBot?: boolean;

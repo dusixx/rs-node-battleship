@@ -1,5 +1,6 @@
 import EventEmitter from 'node:events';
 import { type RawData, type WebSocket } from 'ws';
+import type { Bot } from '../bot/bot';
 import { BOT_ALIAS, GameEvent } from '../common/constants';
 import type {
   AddShipsRequest,
@@ -16,8 +17,7 @@ import {
   sendStartGame,
   sendTurn,
 } from '../common/utils';
-import type { Bot } from '../session-manager/components/bot';
-import { Room } from '../session-manager/components/room';
+import { Room } from '../room/room';
 import type { Player } from '../session-manager/session-manager';
 import { Fleet } from './fleet/fleet';
 type PlayerEventName = 'message' | 'close';

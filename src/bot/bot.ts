@@ -1,10 +1,10 @@
 import type { WebSocketServer } from 'ws';
 import { WebSocket } from 'ws';
-import { BOT_ATTACK_DELAY, DEF_HOSTNAME } from '../../common/constants';
-import { fleets } from '../../common/data/fleets';
-import type { AddShipsRequest, RandomAttackRequest, ShipInfo } from '../../common/types';
-import { getId, gray, hasOwnKeys, PORT, rndInt, sleep, stringifyRequest } from '../../common/utils';
-import type { Player } from '../session-manager';
+import { BOT_ATTACK_DELAY, DEF_HOSTNAME } from '../common/constants';
+import type { AddShipsRequest, RandomAttackRequest, ShipInfo } from '../common/types';
+import { getId, gray, hasOwnKeys, PORT, rndInt, sleep, stringifyRequest } from '../common/utils';
+import type { Player } from '../session-manager/session-manager';
+import { fleets } from './data/fleets';
 
 export class Bot implements Player {
   public name: string;
