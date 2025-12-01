@@ -16,7 +16,7 @@ import {
   sendStartGame,
   sendTurn,
 } from '../common/utils';
-import type { Bot } from '../session-manager/components/create-bot';
+import type { Bot } from '../session-manager/components/bot';
 import { Room } from '../session-manager/components/room';
 import type { Player } from '../session-manager/session-manager';
 import { Fleet } from './fleet/fleet';

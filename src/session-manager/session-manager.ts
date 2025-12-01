@@ -12,7 +12,7 @@ import {
 } from '../common/utils/response';
 import type { GameFinishEventResult } from '../game/game';
 import { Game } from '../game/game';
-import { createBot } from './components/create-bot';
+import { Bot } from './components/bot';
 import { Room } from './components/room';
 
 export type Player = Credentials & {
@@ -116,7 +116,7 @@ export class SessionManager {
 
   private handleSinglePlay = async (ws: WebSocket): Promise<void> => {
     // do not add bot to players
-    const bot = createBot(this.wss);
+    const bot = new Bot(this.wss);
     const room = new Room(bot);
     this.rooms.set(bot.name, room);
 
