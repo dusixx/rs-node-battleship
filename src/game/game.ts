@@ -10,12 +10,12 @@ import type {
 } from '../common/types/index';
 import {
   sendAttack as _sendAttack,
+  logger,
   parseCommandRequest,
   sendFinishGame,
   sendStartGame,
   sendTurn,
 } from '../common/utils';
-import { logger } from '../common/utils/logger';
 import { Room } from '../room/room';
 import type { Player } from '../session-manager/session-manager';
 import { Fleet } from './fleet/fleet';

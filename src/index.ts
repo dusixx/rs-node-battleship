@@ -1,8 +1,7 @@
 import fs from 'fs';
 import type { IncomingMessage, ServerResponse } from 'http';
 import path from 'path';
-import { PORT, startServers } from './common/utils';
-import { logger } from './common/utils/logger';
+import { logger, PORT, startServers } from './common/utils';
 import { SessionManager } from './session-manager/session-manager';
 
 const requestListener = (req: IncomingMessage, res: ServerResponse): void => {

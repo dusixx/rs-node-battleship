@@ -3,8 +3,7 @@ import { type RawData, type WebSocketServer } from 'ws';
 import { Bot } from '../bot/bot';
 import { BOT_ALIAS, ErrorMessage, GameEvent } from '../common/constants';
 import type { Credentials, UpdateRoomResponse, UpdateWinnersResponse } from '../common/types/game';
-import { magenta, parseCommandRequest } from '../common/utils';
-import { logger } from '../common/utils/logger';
+import { logger, magenta, parseCommandRequest } from '../common/utils';
 import {
   sendCreateGame,
   sendLoginError,
