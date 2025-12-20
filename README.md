@@ -7,18 +7,21 @@ git checkout dev
 npm i
 ```
 
-```sh
-# create .env file
-cp .env.example .env
+### Create `.env`
 
+```sh
+cp .env.example .env
+```
+
+## 🚀 Running
+
+```sh
 # run in production mode
 npm start
 
 # run in dev mode
 npm run dev
 ```
-
-## 🚀 Running
 
 http://localhost:3000
 
