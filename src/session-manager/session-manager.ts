@@ -3,7 +3,8 @@ import { type RawData, type WebSocketServer } from 'ws';
 import { Bot } from '../bot/bot';
 import { BOT_ALIAS, ErrorMessage, GameEvent } from '../common/constants';
 import type { Credentials, UpdateRoomResponse, UpdateWinnersResponse } from '../common/types/game';
-import { cyan, gray, magenta, parseCommandRequest, showError, yellow } from '../common/utils';
+import { magenta, parseCommandRequest } from '../common/utils';
+import { logger } from '../common/utils/logger';
 import {
   sendCreateGame,
   sendLoginError,
@@ -47,13 +48,13 @@ export class SessionManager {
     try {
       parsedResult = parseCommandRequest(rawData);
     } catch (err) {
-      showError(err);
+      logger.error(err);
       return;
     }
-    const { parsed, stringified } = parsedResult;
+    const { parsed } = parsedResult;
 
     const clientId = this.clients.get(ws)?.name ?? BOT_ALIAS;
-    console.log(magenta(`[${clientId}]:`), yellow(`${parsed.type}:`), gray(stringified));
+    logger.client(clientId, parsedResult);
 
     switch (parsed.type) {
       case 'reg': {
@@ -115,16 +116,17 @@ export class SessionManager {
   };
 
   private handleSinglePlay = async (ws: WebSocket): Promise<void> => {
-    // do not add bot to players
-    const bot = new Bot(this.wss);
-    const room = new Room(bot);
-    this.rooms.set(bot.name, room);
-
     const player = this.clients.get(ws);
     if (!player) {
       return;
     }
+    // do not add bot to players
+    const bot = new Bot(this.wss);
+
+    const room = new Room(bot);
+    this.rooms.set(bot.name, room);
     await this.handleAddUserToRoom(ws, room.id);
+
     bot.addShips();
   };
 
@@ -259,14 +261,14 @@ export class SessionManager {
   };
 
   private handleConnection = (ws: WebSocket): void => {
-    console.log(cyan('[server]:'), 'someone connected');
+    logger.server('someone connected');
 
     ws.on('message', data => {
       this.handleMessage(ws, data);
     });
     ws.on('close', () => {
       const clientId = this.clients.get(ws)?.name ?? BOT_ALIAS;
-      console.log(cyan('[server]:'), magenta(clientId), 'disconnected');
+      logger.server(magenta(clientId), 'disconnected');
       this.handleConnectionClose(ws);
     });
   };

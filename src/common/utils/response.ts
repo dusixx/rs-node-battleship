@@ -10,7 +10,8 @@ import type {
   UpdateWinnersResponse,
   WithOptional,
 } from '../types/index';
-import { cyan, gray, yellow } from './style';
+import { logger } from './logger';
+import { gray, yellow } from './style';
 
 export const send = async (ws: WebSocket, data: string): Promise<void> => {
   await new Promise<void>((resolve, reject) => {
@@ -41,7 +42,7 @@ export const sendCommandResponse = async <T extends CommandType>(
   for (const ws of webSocket) {
     if (ws.readyState === ws.OPEN) {
       await send(ws, stringified);
-      console.log(cyan('[server]:'), yellow(`${response.type}:`), gray(stringified));
+      logger.server(yellow(`${response.type}:`), gray(stringified));
     }
   }
 };

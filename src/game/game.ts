@@ -10,13 +10,12 @@ import type {
 } from '../common/types/index';
 import {
   sendAttack as _sendAttack,
-  gray,
-  green,
   parseCommandRequest,
   sendFinishGame,
   sendStartGame,
   sendTurn,
 } from '../common/utils';
+import { logger } from '../common/utils/logger';
 import { Room } from '../room/room';
 import type { Player } from '../session-manager/session-manager';
 import { Fleet } from './fleet/fleet';
@@ -66,7 +65,7 @@ export class Game extends EventEmitter {
     if (this.bot) {
       this.bot.ws.close();
     }
-    console.log(green(`[game]:`), gray(`(${this.id})`), name, 'won');
+    logger.game(this.id, name, 'won');
     await sendFinishGame(this.getClients(), name);
     // TODO: need to type
     this.emit(GameEvent.Finish, { winner, game: this });
@@ -97,12 +96,7 @@ export class Game extends EventEmitter {
   private handleMessage = (ws: WebSocket, rawData: RawData): void => {
     const { parsed } = parseCommandRequest(rawData);
 
-    console.log(
-      green(`[game]:`),
-      gray(`(${this.id})`),
-      this.room.findPlayer(ws)?.name,
-      parsed.type,
-    );
+    logger.game(this.id, this.room.findPlayer(ws)?.name, parsed.type);
 
     switch (parsed.type) {
       case 'add_ships': {

@@ -1,7 +1,8 @@
 import fs from 'fs';
 import type { IncomingMessage, ServerResponse } from 'http';
 import path from 'path';
-import { cyan, PORT, showError, startServers } from './common/utils';
+import { PORT, startServers } from './common/utils';
+import { logger } from './common/utils/logger';
 import { SessionManager } from './session-manager/session-manager';
 
 const requestListener = (req: IncomingMessage, res: ServerResponse): void => {
@@ -24,12 +25,12 @@ const start = async (): Promise<void> => {
     const wss = await startServers(PORT, requestListener);
 
     console.clear();
-    console.log(cyan(`\n🚀 Servers running on {http|ws}://[::1]:${PORT}`));
+    logger.log('cyan', `\n🚀 Servers running on {http|ws}://[::1]:${PORT}`);
 
     SessionManager.getInstance(wss);
 
     const cleanUp = (): void => {
-      console.log('\nClosing connections...');
+      logger.log('none', '\nClosing connections...');
       wss.close();
       wss.clients.forEach(client => {
         client.terminate();
@@ -39,7 +40,7 @@ const start = async (): Promise<void> => {
     process.on('SIGTERM', cleanUp);
     process.on('SIGINT', cleanUp);
   } catch (err) {
-    showError(err);
+    logger.error(err);
   }
 };
 

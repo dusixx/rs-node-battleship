@@ -1,5 +1,3 @@
-import { red } from './style';
-
 export const isObject = (obj: unknown): obj is Record<string, unknown> => {
   return obj != null && typeof obj === 'object';
 };
@@ -26,10 +24,6 @@ export const JSONParse = (s: string): unknown => {
   } catch {
     return null;
   }
-};
-
-export const showError = (err: unknown): void => {
-  console.log(red('Error: '), getErrorMessage(err));
 };
 
 export const getId = (): string => {

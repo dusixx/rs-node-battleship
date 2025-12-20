@@ -8,7 +8,7 @@ export const isLikeCommandRequest = (req: unknown): req is CommandRequestWithStr
   return hasOwnKeys<CommandRequestWithStrigifiedData>(req, 'type', 'data', 'id') && isStr(req.data);
 };
 
-type ParseCommandRequestResult<T extends CommandType> = {
+export type ParseCommandRequestResult<T extends CommandType> = {
   parsed: CommandRequest<T>;
   stringified: string;
 };
