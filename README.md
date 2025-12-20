@@ -1,7 +1,6 @@
-## 🚀 Install & Run
+## ⚙️ Install
 
 ```sh
-# install
 git clone git@github.com:dusixx/rs-node-battleship.git
 cd rs-node-battleship
 git checkout dev
@@ -9,35 +8,27 @@ npm i
 ```
 
 ```sh
-# create .env file from .env.example
+# create .env file
 cp .env.example .env
 
-# run in production mode (both `WebSocket` and `Http` servers)
+# run in production mode
 npm start
 
 # run in dev mode
 npm run dev
 ```
 
-Enter `http://localhost:[PORT]` in your browser.
+## 🚀 Running
 
-You'll find `PORT` in the `.env` file.
+http://localhost:3000
 
-By default `PORT=3000`.
+Enter `http://localhost:[PORT]` in your browser. You'll find `PORT` in the `.env` file. By default `PORT=3000`. Both servers listen on the same `PORT`.
 
-Both servers listen on the same `PORT`.
-
-## ℹ️ Notes
-
-Keep in mind that the game `bot` isn't very smart.
-
-It doesn't hit neighboring cells to kill.
-
-But it never hits the same cell twice.
+Keep in mind that the `game bot` isn't very smart. It doesn't hit neighboring cells to kill. But it never hits the same cell twice.
 
 Have fun!
 
-## 🆘 In case something goes wrong
+## 🆘 If something goes wrong
 
 to `kill` the node, enter in the `OS` terminal
 
