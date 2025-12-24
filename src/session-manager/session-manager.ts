@@ -51,9 +51,7 @@ export class SessionManager {
       return;
     }
     const { parsed } = parsedResult;
-
-    const clientId = this.clients.get(ws)?.name ?? BOT_ALIAS;
-    logger.client(clientId, parsedResult);
+    logger.client(this.clients.get(ws)?.name, parsedResult);
 
     switch (parsed.type) {
       case 'reg': {

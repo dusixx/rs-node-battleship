@@ -24,7 +24,7 @@ const start = async (): Promise<void> => {
     const wss = await startServers(PORT, requestListener);
 
     console.clear();
-    logger.log('cyan', `\n🚀 Servers running on {http|ws}://[::1]:${PORT}`);
+    logger.log('cyan', `\n🚀 Server running on http://localhost:${PORT}\n`);
 
     SessionManager.getInstance(wss);
 

@@ -31,7 +31,7 @@ export class Bot implements Player {
       type: 'add_ships',
       data: { gameId: name, indexPlayer: name, ships },
     };
-    logger.debug('fleet (${idx})');
+    logger.debug(`fleet (${idx})`);
     ws.emit('message', stringifyRequest(req));
   }
 
