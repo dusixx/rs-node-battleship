@@ -1,0 +1,46 @@
+import fs from 'fs';
+import type { IncomingMessage, ServerResponse } from 'http';
+import path from 'path';
+import { logger, PORT, startServers } from './common/utils';
+import { SessionManager } from './components/session-manager/session-manager';
+
+const requestListener = (req: IncomingMessage, res: ServerResponse): void => {
+  const __dirname = path.resolve(path.dirname(''));
+  const file_path =
+    __dirname + (req.url === '/' ? '/front/index.html' : '/front' + (req.url ?? ''));
+  fs.readFile(file_path, (err, data) => {
+    if (err) {
+      res.writeHead(404);
+      res.end(JSON.stringify(err));
+      return;
+    }
+    res.writeHead(200);
+    res.end(data);
+  });
+};
+
+const start = async (): Promise<void> => {
+  try {
+    const wss = await startServers(PORT, requestListener);
+
+    console.clear();
+    logger.log('cyan', `\n🚀 Server running on http://localhost:${PORT}\n`);
+
+    SessionManager.getInstance(wss);
+
+    const cleanUp = (): void => {
+      logger.log('none', '\nClosing connections...');
+      wss.close();
+      wss.clients.forEach(client => {
+        client.terminate();
+      });
+      process.exit(0);
+    };
+    process.on('SIGTERM', cleanUp);
+    process.on('SIGINT', cleanUp);
+  } catch (err) {
+    logger.error(err);
+  }
+};
+
+void start();

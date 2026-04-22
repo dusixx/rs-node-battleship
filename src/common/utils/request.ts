@@ -1,0 +1,42 @@
+/* eslint-disable @typescript-eslint/no-base-to-string */
+import type { RawData } from 'ws';
+import { ErrorMessage } from '../constants';
+import type { CommandRequest, CommandRequestWithStringifiedData, CommandType } from '../types/game';
+import { hasOwnKeys, isObject, isStr, JSONParse } from './misc';
+
+export const isLikeCommandRequest = (req: unknown): req is CommandRequestWithStringifiedData => {
+  return (
+    hasOwnKeys<CommandRequestWithStringifiedData>(req, 'type', 'data', 'id') && isStr(req.data)
+  );
+};
+
+export type ParseCommandRequestResult<T extends CommandType> = {
+  parsed: CommandRequest<T>;
+  stringified: string;
+};
+
+export const parseCommandRequest = <T extends CommandType>(
+  buf: RawData,
+): ParseCommandRequestResult<T> => {
+  const stringified = buf.toString();
+  const req = JSONParse(stringified);
+
+  // with stringified data
+  if (!isLikeCommandRequest(req)) {
+    throw new Error(ErrorMessage.InvalidCommandRequest);
+  }
+  const parsedData = JSONParse(req.data);
+
+  // create_room -> {data: ''} -> {data: null}
+  if (parsedData !== null && !isObject(parsedData)) {
+    throw new Error(ErrorMessage.InvalidCommandRequest);
+  }
+  return {
+    parsed: { ...req, data: parsedData } as CommandRequest<T>,
+    stringified,
+  };
+};
+
+export const stringifyRequest = <T extends CommandType>(req: CommandRequest<T>): string => {
+  return JSON.stringify({ ...req, data: JSON.stringify(req.data) });
+};

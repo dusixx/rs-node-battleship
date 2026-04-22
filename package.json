@@ -1,0 +1,67 @@
+{
+  "name": "ws_battleship_sever",
+  "version": "1.0.0",
+  "description": "Websocket battleship server",
+  "main": "index.js",
+  "scripts": {
+    "dev": "ts-node -r tsconfig-paths/register src/index.ts",
+    "build": "tsc && tsc-alias && esbuild dist/**/*.js --minify --allow-overwrite --outdir=dist",
+    "start": "rimraf dist && npm run build && node dist/index.js",
+    "dev:nodemon": "nodemon --watch src --ext ts --exec ts-node src/index.ts",
+    "test": "echo not implemented",
+    "coverage": "echo not implemented",
+    "prepare": "husky",
+    "format": "npx prettier . --check --ignore-unknown",
+    "format:fix": "npx prettier . --write --list-different --ignore-unknown",
+    "lint": "eslint ./src",
+    "lint:fix": "npm run lint --fix",
+    "fix:deps": "rm -rf node_modules package-lock.json && npm cache clean --force && npm i"
+  },
+  "author": "dusixx",
+  "keywords": [
+    "Websocket",
+    "Server",
+    "Battleship"
+  ],
+  "license": "ISC",
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.39.1",
+    "@tsconfig/recommended": "^1.0.11",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.0",
+    "@types/supertest": "^6.0.3",
+    "@types/ws": "^8.18.1",
+    "@typescript-eslint/eslint-plugin": "^8.46.3",
+    "@typescript-eslint/parser": "^8.46.3",
+    "esbuild": "^0.28.0",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "globals": "^16.5.0",
+    "husky": "^9.1.7",
+    "jest": "^30.2.0",
+    "lint-staged": "^16.2.6",
+    "nodemon": "^3.1.10",
+    "prettier": "^3.6.2",
+    "supertest": "^7.1.4",
+    "ts-jest": "^29.4.5",
+    "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.16",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.46.3"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "rimraf": "^6.1.2",
+    "ws": "^8.8.0"
+  }
+}
