@@ -24,7 +24,8 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     "isolatedModules": true,
-    "moduleDetection": "force"
+    "moduleDetection": "force",
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src"],
   "exclude": [
