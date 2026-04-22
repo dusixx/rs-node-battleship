@@ -1,9 +1,18 @@
+import type { AddShipsRequest, RandomAttackRequest, ShipInfo } from '@common';
+import {
+  BOT_ATTACK_DELAY,
+  DEF_HOSTNAME,
+  getId,
+  hasOwnKeys,
+  logger,
+  PORT,
+  rndInt,
+  sleep,
+  stringifyRequest,
+} from '@common';
+import type { Player } from '@components';
 import type { WebSocketServer } from 'ws';
 import { WebSocket } from 'ws';
-import { BOT_ATTACK_DELAY, DEF_HOSTNAME } from '../common/constants';
-import type { AddShipsRequest, RandomAttackRequest, ShipInfo } from '../common/types';
-import { getId, hasOwnKeys, logger, PORT, rndInt, sleep, stringifyRequest } from '../common/utils';
-import type { Player } from '../session-manager/session-manager';
 import { fleets } from './data/fleets';
 
 export class Bot implements Player {

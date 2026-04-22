@@ -1,12 +1,8 @@
 /* eslint-disable prefer-const */
-import type { Position, ShipInfo } from '../../common/types/game';
+import type { Position, ShipInfo } from '@common';
+import type { GetCellsResult } from './fleet.types';
 
 export const FIELD_SIZE = 10;
-
-type GetCellsResult = {
-  body: Position[];
-  around: Position[];
-};
 
 const isValidPosition = ({ x, y }: Position): boolean => {
   return x < FIELD_SIZE && x >= 0 && y < FIELD_SIZE && y >= 0;

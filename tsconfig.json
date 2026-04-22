@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "baseUrl": "src",
     "outDir": "dist",
     "rootDir": "src",
     "target": "ES2020",
@@ -25,7 +24,15 @@
     "noUncheckedSideEffectImports": true,
     "isolatedModules": true,
     "moduleDetection": "force",
-    "ignoreDeprecations": "6.0"
+
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+    "paths": {
+      "@components/*": ["src/components/*"],
+      "@components": ["src/components"],
+      "@common/*": ["src/common/*"],
+      "@common": ["src/common"]
+    }
   },
   "include": ["src"],
   "exclude": [

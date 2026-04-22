@@ -1,23 +1,18 @@
-import EventEmitter from 'node:events';
-import { type RawData, type WebSocket } from 'ws';
-import type { Bot } from '../bot/bot';
-import { BOT_ALIAS, GameEvent } from '../common/constants';
-import type {
-  AddShipsRequest,
-  AnyFunction,
-  AttackRequest,
-  RandomAttackRequest,
-} from '../common/types/index';
+import type { AddShipsRequest, AnyFunction, AttackRequest, RandomAttackRequest } from '@common';
 import {
   sendAttack as _sendAttack,
+  BOT_ALIAS,
+  GameEvent,
   logger,
   parseCommandRequest,
   sendFinishGame,
   sendStartGame,
   sendTurn,
-} from '../common/utils';
-import { Room } from '../room/room';
-import type { Player } from '../session-manager/session-manager';
+} from '@common';
+import type { Bot, Player } from '@components';
+import { Room } from '@components';
+import EventEmitter from 'node:events';
+import { type RawData, type WebSocket } from 'ws';
 import { Fleet } from './fleet/fleet';
 type PlayerEventName = 'message' | 'close';
 

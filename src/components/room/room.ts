@@ -1,7 +1,7 @@
+import type { RoomUsers } from '@common';
+import { isStr } from '@common';
+import type { Player } from '@components';
 import { WebSocket } from 'ws';
-import type { RoomUsers } from '../common/types';
-import { isStr } from '../common/utils';
-import type { Player } from '../session-manager/session-manager';
 
 type PlayerItem = string | WebSocket | Player;
 

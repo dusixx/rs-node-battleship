@@ -2,7 +2,7 @@ import fs from 'fs';
 import type { IncomingMessage, ServerResponse } from 'http';
 import path from 'path';
 import { logger, PORT, startServers } from './common/utils';
-import { SessionManager } from './session-manager/session-manager';
+import { SessionManager } from './components/session-manager/session-manager';
 
 const requestListener = (req: IncomingMessage, res: ServerResponse): void => {
   const __dirname = path.resolve(path.dirname(''));

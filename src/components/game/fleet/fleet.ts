@@ -1,20 +1,7 @@
-import type { AttackResponse, Position, ShipInfo } from '../../common/types/game';
-import { rndInt } from '../../common/utils';
+import type { Position, ShipInfo } from '@common';
+import { rndInt } from '@common';
+import type { AttackResult, Boat, XYPair } from './fleet.types';
 import { FIELD_SIZE, getCells } from './fleet.utils';
-
-type XYPair = `${number},${number}`;
-
-type Boat = {
-  body: Set<XYPair>; // {"1,2", "1,4"...}
-  around: Position[]; // cells around [{1,2},{1,3},...]
-};
-
-export type AttackResult =
-  | (Omit<AttackResponse['data'], 'currentPlayer'> & {
-      around: Position[];
-      defeat?: boolean;
-    })
-  | ({ status: 'touched' } & Record<string, unknown>);
 
 export class Fleet {
   private _boats: Boat[] = [];

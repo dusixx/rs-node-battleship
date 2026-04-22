@@ -1,19 +1,21 @@
-import type { WebSocket } from 'ws';
-import { type RawData, type WebSocketServer } from 'ws';
-import { Bot } from '../bot/bot';
-import { BOT_ALIAS, ErrorMessage, GameEvent } from '../common/constants';
-import type { Credentials, UpdateRoomResponse, UpdateWinnersResponse } from '../common/types/game';
-import { logger, magenta, parseCommandRequest } from '../common/utils';
+import type { Credentials, UpdateRoomResponse, UpdateWinnersResponse } from '@common';
 import {
+  BOT_ALIAS,
+  ErrorMessage,
+  GameEvent,
+  logger,
+  magenta,
+  parseCommandRequest,
   sendCreateGame,
   sendLoginError,
   sendLoginSuccess,
   sendUpdateRoom,
   sendUpdateWinners,
-} from '../common/utils/response';
-import type { GameFinishEventResult } from '../game/game';
-import { Game } from '../game/game';
-import { Room } from '../room/room';
+} from '@common';
+import type { GameFinishEventResult } from '@components';
+import { Bot, Game, Room } from '@components';
+import type { WebSocket } from 'ws';
+import { type RawData, type WebSocketServer } from 'ws';
 
 export type Player = Credentials & {
   isBot?: boolean;
