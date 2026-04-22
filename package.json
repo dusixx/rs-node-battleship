@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon --watch src --ext ts --exec ts-node src/index.ts",
     "start": "rimraf dist && npm run build && node dist/index.js",
-    "build": "tsc",
+    "build": "tsc && esbuild dist/**/*.js --minify --allow-overwrite --outdir=dist",
     "test": "echo not implemented",
     "coverage": "echo not implemented",
     "prepare": "husky",
@@ -39,6 +39,7 @@
     "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^8.46.3",
     "@typescript-eslint/parser": "^8.46.3",
+    "esbuild": "^0.28.0",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
