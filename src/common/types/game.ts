@@ -39,13 +39,13 @@ export type CommandType =
   | 'turn'
   | 'finish';
 
-export type CommandRequestWithStrigifiedData = {
+export type CommandRequestWithStringifiedData = {
   type: CommandType;
   data: string; // should be a json string
   id: 0; // should be always 0
 };
 
-type Command<T extends CommandType> = Omit<CommandRequestWithStrigifiedData, 'data'> & {
+type Command<T extends CommandType> = Omit<CommandRequestWithStringifiedData, 'data'> & {
   type: T;
 };
 

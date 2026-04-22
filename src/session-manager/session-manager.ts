@@ -182,7 +182,7 @@ export class SessionManager {
     for (const { ws, name } of room.players) {
       await sendCreateGame(ws, { idGame: room.id, idPlayer: name });
     }
-    // remove room from availables
+    // remove room from available
     this.rooms.delete(room.id);
     await sendUpdateRoom(this.clients.keys(), this.getAvailableRooms());
   };
